@@ -1,0 +1,6931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Deep Space Archive — Beyond the Visible</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/dm-sans/300.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/dm-sans/400.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/instrument-serif/400.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/instrument-serif/400-italic.css">
+
+<style>
+:root{
+  --paper:#F5F5F2;
+  --paper2:#E9E8E4;
+  --paper3:#DEDFDB;
+  --ink:#090B0C;
+  --sage:#B8C0BC;
+  --clay:#C9C3B9;
+  --ice:#B9E5F3;
+
+  --muted:rgba(9,11,12,.56);
+  --hair:rgba(9,11,12,.14);
+
+  --hero-y:0px;
+  --hero-scale:1;
+  --hero-alpha:1;
+  --hero-vignette:.02;
+
+  --catalogue-x:0px;
+
+  --close-y:0%;
+  --close-scale:1.06;
+
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+
+*{
+  box-sizing:border-box;
+}
+
+html,body{
+  margin:0;
+  padding:0;
+}
+
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"DM Sans",sans-serif;
+  font-weight:300;
+  overflow-x:hidden;
+}
+
+body,button{
+  font-family:"DM Sans",sans-serif;
+}
+
+::selection{
+  background:var(--ice);
+  color:var(--ink);
+}
+
+h1,h2,h3,p{
+  margin:0;
+}
+
+a{
+  color:inherit;
+  text-decoration:none;
+}
+
+canvas{
+  display:block;
+}
+
+.serif{
+  font-family:"Instrument Serif",serif;
+  font-weight:400;
+  letter-spacing:-.04em;
+  line-height:.94;
+}
+
+.italic{
+  font-style:italic;
+}
+
+.ice{
+  color:var(--ice);
+}
+
+.mono{
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
+
+  font-size:10.5px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+}
+
+
+/* =========================
+   NAV
+========================= */
+
+.nav{
+  position:fixed;
+  z-index:100;
+  top:0;
+  left:0;
+  width:100%;
+  height:76px;
+
+  mix-blend-mode:difference;
+
+  color:white;
+  pointer-events:none;
+}
+
+.nav-inner{
+  width:91.5vw;
+  max-width:1360px;
+  height:100%;
+  margin:auto;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.nav-brand{
+  font-family:"Instrument Serif",serif;
+  font-size:25px;
+  letter-spacing:-.04em;
+  pointer-events:auto;
+}
+
+.nav-links{
+  display:flex;
+  gap:30px;
+  pointer-events:auto;
+}
+
+.nav-links a{
+  font-size:10px;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+}
+
+
+/* =========================
+   STAGES
+========================= */
+
+.stage{
+  position:relative;
+}
+
+.stage-pin{
+  position:sticky;
+  top:0;
+
+  height:100svh;
+
+  overflow:hidden;
+}
+
+.dark{
+  background:var(--ink);
+  color:var(--paper);
+}
+
+.paper{
+  background:var(--paper);
+  color:var(--ink);
+}
+
+.tint{
+  background:var(--paper2);
+}
+
+.stage-hero{
+  height:280svh;
+}
+
+.stage-catalogue{
+  height:340svh;
+}
+
+.stage-process{
+  height:380svh;
+}
+
+.stage-close{
+  height:280svh;
+}
+
+
+/* =========================
+   HERO
+========================= */
+
+.hero-canvas{
+  position:absolute;
+  inset:0;
+
+  width:100%;
+  height:100%;
+}
+
+.hero-vignette{
+  position:absolute;
+  inset:-10%;
+
+  pointer-events:none;
+
+  background:
+    radial-gradient(
+      ellipse at center,
+      transparent 18%,
+      rgba(9,11,12,.05) 43%,
+      rgba(9,11,12,var(--hero-vignette)) 85%
+    );
+}
+
+.hero-content{
+  position:absolute;
+  inset:0;
+
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+
+  text-align:center;
+
+  transform:
+    translate3d(0,var(--hero-y),0)
+    scale(var(--hero-scale));
+
+  opacity:var(--hero-alpha);
+
+  will-change:
+    transform,
+    opacity;
+
+  padding:20px;
+}
+
+.hero-strap{
+  margin-bottom:28px;
+  opacity:.5;
+}
+
+.hero-title{
+  white-space:nowrap;
+
+  font-size:
+    min(
+      clamp(3.4rem,20vw,14rem),
+      calc(92vw / (20 * .46))
+    );
+
+  line-height:.8;
+}
+
+.hero-sub{
+  max-width:510px;
+
+  margin-top:34px;
+
+  font-size:14px;
+  line-height:1.6;
+
+  opacity:.6;
+}
+
+.hero-button{
+  margin-top:35px;
+
+  border:1px solid var(--ice);
+
+  background:transparent;
+
+  color:var(--ice);
+
+  padding:13px 22px;
+
+  font-size:10px;
+
+  letter-spacing:.13em;
+
+  text-transform:uppercase;
+
+  cursor:pointer;
+}
+
+
+/* =========================
+   WORD REVEAL
+========================= */
+
+.word{
+  display:inline-block;
+
+  opacity:0;
+
+  transform:translateY(.38em);
+
+  transition:
+    opacity:900ms var(--ease),
+    transform:900ms var(--ease);
+
+  transition-delay:
+    calc(var(--word-index,0) * 38ms);
+}
+
+.revealed .word{
+  opacity:1;
+  transform:translateY(0);
+}
+
+[data-rev]{
+  opacity:0;
+
+  transform:translateY(18px);
+
+  transition:
+    opacity:900ms var(--ease),
+    transform:900ms var(--ease);
+
+  transition-delay:var(--d,0ms);
+}
+
+[data-rev].is-visible{
+  opacity:1;
+  transform:translateY(0);
+}
+
+
+/* =========================
+   CATALOGUE
+========================= */
+
+.catalogue-heading{
+  position:absolute;
+
+  z-index:2;
+
+  top:14%;
+  left:0;
+
+  width:100%;
+
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+}
+
+.catalogue-heading h2{
+  font-size:
+    clamp(50px,7vw,100px);
+}
+
+.catalogue-track-wrap{
+  position:absolute;
+
+  left:0;
+  right:0;
+
+  top:31%;
+
+  overflow:visible;
+}
+
+.catalogue-track{
+  display:flex;
+
+  width:max-content;
+
+  gap:
+    clamp(45px,7vw,100px);
+
+  transform:
+    translate3d(
+      var(--catalogue-x),
+      0,
+      0
+    );
+
+  will-change:transform;
+}
+
+.catalogue-item{
+  flex:
+    0 0
+    clamp(240px,27vw,340px);
+}
+
+.space-plate{
+  position:relative;
+
+  width:100%;
+
+  aspect-ratio:4/5;
+
+  overflow:hidden;
+
+  margin-bottom:24px;
+
+  border:1px solid rgba(9,11,12,.12);
+}
+
+.space-plate canvas{
+  width:100%;
+  height:100%;
+}
+
+/* text block — plain flow container, no styling on desktop */
+
+.card-info{
+  position:relative;
+}
+
+.item-name{
+  font-size:
+    clamp(27px,3vw,42px);
+
+  margin-bottom:9px;
+}
+
+.item-meta{
+  margin-bottom:16px;
+
+  opacity:.48;
+}
+
+.item-note{
+  max-width:280px;
+
+  font-size:13px;
+  line-height:1.5;
+
+  opacity:.62;
+}
+
+
+/* =========================
+   METHOD
+========================= */
+
+.process-layout{
+  width:91.5vw;
+  max-width:1360px;
+
+  height:100%;
+
+  margin:auto;
+
+  display:grid;
+
+  grid-template-columns:
+    minmax(0,.8fr)
+    minmax(0,1.2fr);
+
+  gap:8vw;
+
+  align-items:center;
+}
+
+.process-title{
+  font-size:
+    clamp(54px,7vw,110px);
+
+  margin-bottom:55px;
+}
+
+.process-lede{
+  max-width:390px;
+
+  font-size:14px;
+  line-height:1.55;
+
+  opacity:.55;
+
+  margin-bottom:45px;
+}
+
+.steps{
+  border-top:
+    1px solid
+    rgba(245,245,242,.15);
+}
+
+.step{
+  position:relative;
+
+  padding:21px 20px;
+
+  border-bottom:
+    1px solid
+    rgba(245,245,242,.15);
+
+  border-left:1px solid transparent;
+
+  transition:
+    border-color 500ms var(--ease),
+    padding-left 500ms var(--ease);
+}
+
+.step.active{
+  border-left-color:var(--ice);
+
+  padding-left:27px;
+}
+
+.step-top{
+  display:flex;
+  justify-content:space-between;
+
+  margin-bottom:8px;
+}
+
+.step-title{
+  font-family:"Instrument Serif",serif;
+
+  font-size:28px;
+
+  letter-spacing:-.03em;
+}
+
+.step-description{
+  max-width:360px;
+
+  font-size:12px;
+
+  line-height:1.45;
+
+  opacity:.48;
+}
+
+.process-right{
+  position:relative;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.galaxy-wrap{
+  position:relative;
+  min-height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.galaxy-canvas{
+  width:min(55vw,760px);
+  height:min(55vw,760px);
+  display:block;
+  cursor:crosshair;
+}
+
+.galaxy-label{
+  position:absolute;
+  right:0;
+  bottom:12%;
+  color:rgba(245,245,242,.35);
+}
+
+
+/* =========================
+   CLOSING
+========================= */
+
+.close-canvas{
+  position:absolute;
+  inset:0;
+
+  width:100%;
+  height:100%;
+}
+
+.close-content{
+  position:absolute;
+
+  left:50%;
+  bottom:13%;
+
+  transform:translateX(-50%);
+
+  width:91.5vw;
+  max-width:1360px;
+
+  z-index:2;
+}
+
+.close-title{
+  max-width:1000px;
+
+  font-size:
+    clamp(54px,9vw,145px);
+}
+
+.close-small{
+  max-width:420px;
+
+  margin-top:30px;
+
+  font-size:13px;
+
+  line-height:1.55;
+
+  opacity:.55;
+}
+
+
+/* =========================
+   STATEMENT
+========================= */
+
+.statement-band{
+  background:var(--paper);
+
+  padding:150px 0;
+}
+
+.statement-grid{
+  width:91.5vw;
+  max-width:1360px;
+
+  margin:auto;
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(3,1fr);
+
+  gap:7vw;
+}
+
+.statement-col{
+  border-top:
+    1px solid
+    var(--hair);
+
+  padding-top:20px;
+}
+
+.statement-col h3{
+  font-size:38px;
+
+  margin-bottom:28px;
+}
+
+.statement-col p{
+  font-size:14px;
+
+  line-height:1.65;
+
+  color:var(--muted);
+}
+
+
+/* =========================
+   FOOTER
+========================= */
+
+footer{
+  background:var(--ink);
+
+  color:var(--paper);
+
+  padding:80px 0;
+}
+
+.footer-inner{
+  width:91.5vw;
+  max-width:1360px;
+
+  margin:auto;
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:end;
+}
+
+.footer-brand{
+  font-family:"Instrument Serif",serif;
+
+  font-size:42px;
+}
+
+.footer-copy{
+  font-size:10px;
+
+  letter-spacing:.12em;
+
+  text-transform:uppercase;
+
+  opacity:.45;
+}
+
+
+/* =========================================================
+   MOBILE LAYOUT — below 900px
+   Pinned / absolute desktop choreography is switched off and
+   every section returns to normal document flow.
+========================================================= */
+
+@media(max-width:900px){
+
+  /* ---------- global flow ---------- */
+
+  .stage{
+    position:relative;
+
+    height:auto!important;
+
+    min-height:0!important;
+
+    scroll-margin-top:64px;
+  }
+
+  .stage-pin{
+    position:relative;
+
+    top:auto;
+
+    height:auto;
+
+    min-height:0;
+
+    overflow:visible;
+  }
+
+  .stage-hero .stage-pin{
+    overflow:hidden;
+  }
+
+  .page{
+    width:100%;
+  }
+
+
+  /* ---------- navigation ---------- */
+
+  .nav{
+    height:60px;
+  }
+
+  .nav-inner{
+    width:89vw;
+
+    gap:16px;
+  }
+
+  .nav-brand{
+    font-size:20px;
+  }
+
+  .nav-links{
+    gap:16px;
+  }
+
+  .nav-links a{
+    font-size:9px;
+
+    letter-spacing:.11em;
+  }
+
+
+  /* ---------- hero ---------- */
+
+  .stage-hero .stage-pin{
+    min-height:94svh;
+
+    display:flex;
+
+    align-items:center;
+  }
+
+  .hero-content{
+    position:relative;
+
+    inset:auto;
+
+    width:100%;
+
+    transform:none!important;
+
+    opacity:1!important;
+
+    padding:88px 22px 60px;
+  }
+
+  .hero-strap{
+    margin-bottom:20px;
+
+    font-size:9.5px;
+  }
+
+  .hero-title{
+    font-size:
+      clamp(2.5rem,14.5vw,4.6rem);
+  }
+
+  .hero-sub{
+    max-width:340px;
+
+    margin-top:26px;
+
+    font-size:13.5px;
+  }
+
+  .hero-button{
+    margin-top:30px;
+  }
+
+
+  /* ---------- selected objects ---------- */
+
+  .catalogue-heading{
+    position:relative;
+
+    top:auto;
+    left:auto;
+
+    width:89vw;
+
+    margin:0 auto;
+
+    padding:88px 0 0;
+
+    flex-direction:column;
+
+    align-items:flex-start;
+
+    gap:14px;
+  }
+
+  .catalogue-heading h2{
+    font-size:
+      clamp(2.4rem,10.5vw,4rem);
+
+    max-width:100%;
+
+    overflow-wrap:break-word;
+  }
+
+  .catalogue-heading .mono{
+    font-size:9.5px;
+  }
+
+
+  /* ---------- catalogue : natural content height ---------- */
+
+  .stage-catalogue{
+    padding-bottom:52px;
+  }
+
+  .catalogue-track-wrap{
+    position:relative;
+
+    top:auto;
+    left:auto;
+    right:auto;
+
+    display:block;
+
+    width:100%;
+
+    height:auto;
+
+    max-height:none;
+
+    overflow-x:auto;
+    overflow-y:hidden;
+
+    -webkit-overflow-scrolling:touch;
+
+    scroll-snap-type:x proximity;
+
+    padding:28px 0 34px;
+
+    scrollbar-width:none;
+  }
+
+  .catalogue-track-wrap::-webkit-scrollbar{
+    display:none;
+  }
+
+  .catalogue-track{
+    transform:none!important;
+
+    align-items:flex-start;
+
+    height:auto;
+
+    gap:18px;
+
+    padding:0 5.5vw;
+  }
+
+  .catalogue-item{
+    flex:
+      0 0
+      min(76vw,320px);
+
+    height:auto;
+
+    min-height:0;
+
+    scroll-snap-align:center;
+
+    padding-bottom:8px;
+  }
+
+  .space-plate{
+    margin-bottom:18px;
+  }
+
+  .card-info{
+    position:static;
+
+    height:auto;
+
+    min-height:0;
+
+    max-height:none;
+
+    overflow:visible;
+
+    transform:none;
+
+    padding-bottom:6px;
+  }
+
+  .item-name{
+    font-size:
+      clamp(1.5rem,6.4vw,2rem);
+
+    margin-bottom:8px;
+
+    overflow-wrap:break-word;
+  }
+
+  .item-meta{
+    margin-bottom:12px;
+
+    font-size:9.5px;
+
+    overflow-wrap:break-word;
+  }
+
+  .item-note{
+    max-width:100%;
+
+    max-height:none;
+
+    overflow:visible;
+
+    font-size:12.5px;
+
+    line-height:1.55;
+
+    overflow-wrap:break-word;
+  }
+
+
+  /* ---------- how we look ---------- */
+
+  .process-layout{
+    width:89vw;
+
+    height:auto;
+
+    display:block;
+
+    padding:88px 0 74px;
+  }
+
+  .process-title{
+    font-size:
+      clamp(2.6rem,11vw,4.2rem);
+
+    margin-bottom:22px;
+
+    overflow-wrap:break-word;
+  }
+
+  .process-lede{
+    max-width:100%;
+
+    margin-bottom:32px;
+
+    font-size:13.5px;
+  }
+
+  .step{
+    padding:18px 16px;
+  }
+
+  .step.active{
+    padding-left:20px;
+  }
+
+  .step-title{
+    font-size:23px;
+  }
+
+  .step-description{
+    max-width:100%;
+
+    font-size:11.5px;
+  }
+
+
+  /* ---------- galaxy : always visible ---------- */
+
+  .process-right,
+  .galaxy-wrap{
+    display:flex!important;
+
+    position:relative;
+
+    min-height:0;
+
+    margin:46px auto 0;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    justify-content:center;
+
+    transform:none;
+  }
+
+  .galaxy-canvas{
+    width:min(88vw,400px);
+    height:min(88vw,400px);
+
+    touch-action:pan-y;
+  }
+
+  .galaxy-label{
+    position:relative;
+
+    right:auto;
+    bottom:auto;
+
+    margin-top:18px;
+
+    text-align:center;
+
+    font-size:9.5px;
+  }
+
+
+  /* ---------- closing ---------- */
+
+  .close-content{
+    position:relative;
+
+    left:auto;
+    bottom:auto;
+
+    transform:none;
+
+    width:89vw;
+
+    margin:0 auto;
+
+    padding:88px 0 74px;
+  }
+
+  .close-title{
+    font-size:
+      clamp(2.3rem,9.4vw,3.6rem);
+
+    overflow-wrap:break-word;
+  }
+
+  .close-small{
+    max-width:100%;
+
+    margin-top:22px;
+
+    font-size:12.5px;
+  }
+
+
+  /* ---------- statements ---------- */
+
+  .statement-band{
+    padding:74px 0;
+  }
+
+  .statement-grid{
+    width:89vw;
+
+    grid-template-columns:1fr;
+
+    gap:44px;
+  }
+
+  .statement-col h3{
+    font-size:30px;
+
+    margin-bottom:16px;
+  }
+
+  .statement-col p{
+    font-size:13.5px;
+  }
+
+
+  /* ---------- footer ---------- */
+
+  footer{
+    padding:56px 0;
+  }
+
+  .footer-inner{
+    width:89vw;
+
+    flex-direction:column;
+
+    align-items:flex-start;
+
+    gap:24px;
+  }
+
+  .footer-brand{
+    font-size:30px;
+  }
+}
+
+
+/* =========================================================
+   SMALL PHONES — below 600px
+========================================================= */
+
+@media(max-width:600px){
+
+  .nav-links{
+    display:none;
+  }
+
+  .nav-inner{
+    justify-content:flex-start;
+  }
+
+  .hero-content{
+    padding:80px 20px 52px;
+  }
+
+  .hero-title{
+    font-size:
+      clamp(2.2rem,13.5vw,3.4rem);
+  }
+
+  .hero-sub{
+    max-width:320px;
+  }
+
+  .catalogue-heading{
+    padding-top:78px;
+  }
+
+  .catalogue-heading h2{
+    font-size:
+      clamp(2.1rem,10vw,2.8rem);
+  }
+
+  .catalogue-track{
+    gap:14px;
+  }
+
+  .catalogue-item{
+    flex:
+      0 0
+      min(80vw,300px);
+  }
+
+  .process-layout{
+    padding:78px 0 62px;
+  }
+
+  .process-title{
+    font-size:
+      clamp(2.3rem,10.5vw,3rem);
+  }
+
+  .galaxy-canvas{
+    width:min(86vw,340px);
+    height:min(86vw,340px);
+  }
+
+  .close-content{
+    padding:78px 0 62px;
+  }
+
+  .close-title{
+    font-size:
+      clamp(2rem,8.6vw,2.8rem);
+  }
+
+  .statement-band{
+    padding:62px 0;
+  }
+}
+
+
+/* =========================================================
+   MOBILE FLOW LOCK  ·  html.is-mobile
+   Class is set by JS from the same 900px media condition.
+   These rules are the final word: they guarantee that the
+   desktop pin / absolute-position choreography can never
+   shorten a section below its real content on mobile.
+========================================================= */
+
+html.is-mobile .stage,
+html.is-mobile .stage-hero,
+html.is-mobile .stage-catalogue,
+html.is-mobile .stage-process,
+html.is-mobile .stage-close{
+  position:relative!important;
+
+  height:auto!important;
+
+  min-height:0!important;
+
+  max-height:none!important;
+}
+
+html.is-mobile .stage-pin{
+  position:relative!important;
+
+  top:auto!important;
+
+  height:auto!important;
+
+  min-height:0!important;
+
+  max-height:none!important;
+
+  overflow:visible!important;
+}
+
+/* hero keeps clipping only for its own vignette bleed */
+
+html.is-mobile .stage-hero .stage-pin{
+  overflow:hidden!important;
+}
+
+
+/* ---------- catalogue flow lock ---------- */
+
+html.is-mobile .stage-catalogue{
+  padding-bottom:52px!important;
+}
+
+html.is-mobile .catalogue-heading{
+  position:relative!important;
+
+  top:auto!important;
+  left:auto!important;
+  right:auto!important;
+
+  width:89vw!important;
+
+  margin:0 auto!important;
+}
+
+html.is-mobile .catalogue-track-wrap{
+  position:relative!important;
+
+  top:auto!important;
+  left:auto!important;
+  right:auto!important;
+  bottom:auto!important;
+
+  display:block!important;
+
+  width:100%!important;
+
+  height:auto!important;
+
+  min-height:0!important;
+
+  max-height:none!important;
+
+  margin:0!important;
+
+  transform:none!important;
+}
+
+html.is-mobile .catalogue-track{
+  height:auto!important;
+
+  min-height:0!important;
+
+  max-height:none!important;
+
+  align-items:flex-start!important;
+
+  transform:none!important;
+}
+
+html.is-mobile .catalogue-item{
+  height:auto!important;
+
+  min-height:0!important;
+
+  max-height:none!important;
+
+  overflow:visible!important;
+
+  transform:none!important;
+}
+
+/* the plate is the only element allowed to clip */
+
+html.is-mobile .space-plate{
+  position:relative!important;
+
+  height:auto!important;
+
+  overflow:hidden!important;
+}
+
+html.is-mobile .card-info{
+  position:static!important;
+
+  inset:auto!important;
+
+  display:block!important;
+
+  width:100%!important;
+
+  height:auto!important;
+
+  min-height:0!important;
+
+  max-height:none!important;
+
+  overflow:visible!important;
+
+  transform:none!important;
+}
+
+html.is-mobile .item-name,
+html.is-mobile .item-meta,
+html.is-mobile .item-note{
+  position:static!important;
+
+  height:auto!important;
+
+  min-height:0!important;
+
+  max-height:none!important;
+
+  overflow:visible!important;
+}
+
+html.is-mobile .item-note{
+  max-width:100%!important;
+}
+
+
+/* ---------- method flow lock ---------- */
+
+html.is-mobile .process-layout{
+  height:auto!important;
+
+  min-height:0!important;
+
+  display:block!important;
+}
+
+html.is-mobile .process-right,
+html.is-mobile .galaxy-wrap{
+  display:flex!important;
+
+  position:relative!important;
+
+  min-height:0!important;
+
+  transform:none!important;
+}
+
+
+/* ---------- closing flow lock ---------- */
+
+html.is-mobile .close-content{
+  position:relative!important;
+
+  left:auto!important;
+  bottom:auto!important;
+
+  transform:none!important;
+
+  margin:0 auto!important;
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media(prefers-reduced-motion:reduce){
+
+  *,
+  *::before,
+  *::after{
+    animation:none!important;
+
+    transition-duration:1ms!important;
+  }
+
+  .word,
+  [data-rev]{
+    opacity:1!important;
+
+    transform:none!important;
+  }
+}
+</style>
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     NAVIGATION
+===================================================== -->
+
+<nav class="nav">
+
+  <div class="nav-inner">
+
+    <a
+      href="#top"
+      class="nav-brand"
+    >
+      Deep Space Archive
+    </a>
+
+    <div class="nav-links">
+
+      <a href="#objects">
+        Objects
+      </a>
+
+      <a href="#process">
+        Method
+      </a>
+
+    </div>
+
+  </div>
+
+</nav>
+
+
+<!-- =====================================================
+     HERO
+===================================================== -->
+
+<section
+  class="stage stage-hero dark"
+  id="top"
+>
+
+  <div class="stage-pin">
+
+    <canvas
+      id="heroCanvas"
+      class="hero-canvas"
+    ></canvas>
+
+    <div class="hero-vignette"></div>
+
+    <div class="hero-content">
+
+      <div
+        class="hero-strap mono"
+        data-rev
+      >
+        A record of the distant
+      </div>
+
+      <h1
+        class="hero-title serif word-reveal"
+      >
+        Deep
+        <span class="italic ice">
+          Space
+        </span>
+      </h1>
+
+      <p
+        class="hero-sub word-reveal"
+      >
+        An evolving archive of black holes,
+        distant worlds, ancient light and the
+        strange objects that pass through our
+        universe.
+      </p>
+
+      <button
+        class="hero-button mono"
+        data-rev
+      >
+        Enter the archive
+      </button>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     COSMIC OBJECTS
+===================================================== -->
+
+<section
+  class="stage stage-catalogue tint"
+  id="objects"
+>
+
+  <div class="stage-pin">
+
+    <div class="page">
+
+      <div class="catalogue-heading">
+
+        <h2 class="serif word-reveal">
+          Selected
+          <span class="italic">
+            objects
+          </span>
+        </h2>
+
+        <div
+          class="mono"
+          data-rev
+        >
+          05 / Archive
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="catalogue-track-wrap">
+
+      <div
+        class="catalogue-track"
+        id="catalogueTrack"
+      >
+
+
+        <!-- OBJECT 01 -->
+
+        <article
+          class="catalogue-item"
+          data-rev
+        >
+
+          <div class="space-plate">
+
+            <canvas
+              data-space="0"
+            ></canvas>
+
+          </div>
+
+          <div class="card-info">
+
+            <h3
+              class="item-name serif"
+              data-rev
+            >
+              Sagittarius A*
+            </h3>
+
+            <div
+              class="item-meta mono"
+              data-rev
+            >
+              Galactic Centre
+            </div>
+
+            <p
+              class="item-note"
+              data-rev
+            >
+              The supermassive black hole at the
+              centre of the Milky Way, surrounded
+              by stars moving through an extreme
+              gravitational environment.
+            </p>
+
+          </div>
+
+        </article>
+
+
+        <!-- OBJECT 02 -->
+
+        <article
+          class="catalogue-item"
+          data-rev
+        >
+
+          <div class="space-plate">
+
+            <canvas
+              data-space="1"
+            ></canvas>
+
+          </div>
+
+          <div class="card-info">
+
+            <h3
+              class="item-name serif"
+              data-rev
+            >
+              TON 618
+            </h3>
+
+            <div
+              class="item-meta mono"
+              data-rev
+            >
+              Quasar / Early Universe
+            </div>
+
+            <p
+              class="item-note"
+              data-rev
+            >
+              An extraordinarily distant quasar
+              powered by a black hole of immense
+              scale, observed through ancient light.
+            </p>
+
+          </div>
+
+        </article>
+
+
+        <!-- OBJECT 03 -->
+
+        <article
+          class="catalogue-item"
+          data-rev
+        >
+
+          <div class="space-plate">
+
+            <canvas
+              data-space="2"
+            ></canvas>
+
+          </div>
+
+          <div class="card-info">
+
+            <h3
+              class="item-name serif"
+              data-rev
+            >
+              Pillars of Creation
+            </h3>
+
+            <div
+              class="item-meta mono"
+              data-rev
+            >
+              Eagle Nebula
+            </div>
+
+            <p
+              class="item-note"
+              data-rev
+            >
+              Towering clouds of gas and dust where
+              new stars form inside one of the most
+              recognizable structures in our galaxy.
+            </p>
+
+          </div>
+
+        </article>
+
+
+        <!-- OBJECT 04 -->
+
+        <article
+          class="catalogue-item"
+          data-rev
+        >
+
+          <div class="space-plate">
+
+            <canvas
+              data-space="3"
+            ></canvas>
+
+          </div>
+
+          <div class="card-info">
+
+            <h3
+              class="item-name serif"
+              data-rev
+            >
+              ʻOumuamua
+            </h3>
+
+            <div
+              class="item-meta mono"
+              data-rev
+            >
+              Interstellar Visitor
+            </div>
+
+            <p
+              class="item-note"
+              data-rev
+            >
+              The first confirmed object observed
+              passing through our Solar System from
+              outside it.
+            </p>
+
+          </div>
+
+        </article>
+
+
+        <!-- OBJECT 05 -->
+
+        <article
+          class="catalogue-item"
+          data-rev
+        >
+
+          <div class="space-plate">
+
+            <canvas
+              data-space="4"
+            ></canvas>
+
+          </div>
+
+          <div class="card-info">
+
+            <h3
+              class="item-name serif"
+              data-rev
+            >
+              Kepler-452b
+            </h3>
+
+            <div
+              class="item-meta mono"
+              data-rev
+            >
+              Exoplanet / Kepler Field
+            </div>
+
+            <p
+              class="item-note"
+              data-rev
+            >
+              A distant world orbiting a Sun-like
+              star, among the objects that expanded
+              our understanding of planetary systems.
+            </p>
+
+          </div>
+
+        </article>
+
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     METHOD
+===================================================== -->
+
+<section
+  class="stage stage-process dark"
+  id="process"
+>
+
+  <div class="stage-pin">
+
+    <div class="process-layout">
+
+      <div class="process-left">
+
+        <h2
+          class="process-title serif word-reveal"
+        >
+          How we
+          <span class="italic ice">look</span>
+        </h2>
+
+        <p
+          class="process-lede word-reveal"
+        >
+          The universe does not reveal itself
+          all at once. We observe the light,
+          trace its journey, and reconstruct
+          distant worlds from what reaches us.
+        </p>
+
+        <div class="steps">
+
+          <div class="step active" data-rev>
+            <div class="step-top">
+              <span class="step-title">
+                Observe
+              </span>
+              <span class="mono">
+                01
+              </span>
+            </div>
+
+            <p class="step-description">
+              We collect the faint signals arriving
+              from objects separated from us by
+              unimaginable distances.
+            </p>
+          </div>
+
+          <div class="step" data-rev>
+            <div class="step-top">
+              <span class="step-title">
+                Trace
+              </span>
+              <span class="mono">
+                02
+              </span>
+            </div>
+
+            <p class="step-description">
+              Light, motion and repeating patterns
+              reveal the paths hidden inside the data.
+            </p>
+          </div>
+
+          <div class="step" data-rev>
+            <div class="step-top">
+              <span class="step-title">
+                Decode
+              </span>
+              <span class="mono">
+                03
+              </span>
+            </div>
+
+            <p class="step-description">
+              Multiple observations turn scattered
+              signals into a physical picture.
+            </p>
+          </div>
+
+          <div class="step" data-rev>
+            <div class="step-top">
+              <span class="step-title">
+                Understand
+              </span>
+              <span class="mono">
+                04
+              </span>
+            </div>
+
+            <p class="step-description">
+              The object becomes part of the larger
+              story of the universe.
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="process-right galaxy-wrap">
+
+        <canvas
+          id="galaxyCanvas"
+          class="galaxy-canvas"
+        ></canvas>
+
+        <div class="galaxy-label mono">
+          ASTRA / DEEP FIELD
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     CLOSING
+===================================================== -->
+
+<section
+  class="stage stage-close paper"
+>
+
+  <div class="stage-pin">
+
+    <canvas
+      id="closeCanvas"
+      class="close-canvas"
+    ></canvas>
+
+    <div class="close-content">
+
+      <h2
+        class="close-title serif word-reveal"
+      >
+        The farther we look,
+        <span class="italic">
+          the older the light becomes.
+        </span>
+      </h2>
+
+      <p
+        class="close-small word-reveal"
+      >
+        Every distant observation is also a
+        glimpse into the past — a record of
+        something that happened long before
+        its light reached us.
+      </p>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     THREE STATEMENTS
+===================================================== -->
+
+<section class="statement-band">
+
+  <div class="statement-grid">
+
+
+    <article
+      class="statement-col"
+      data-rev
+    >
+
+      <h3 class="serif word-reveal">
+        Distance
+      </h3>
+
+      <p>
+        Looking farther into space means looking
+        farther back in time. The light reaching
+        our instruments may have travelled for
+        millions or billions of years.
+      </p>
+
+    </article>
+
+
+    <article
+      class="statement-col"
+      data-rev
+    >
+
+      <h3 class="serif word-reveal">
+        Light
+      </h3>
+
+      <p>
+        Light is information. Its brightness,
+        colour, movement and spectrum can reveal
+        temperature, composition, velocity and
+        enormous cosmic structures.
+      </p>
+
+    </article>
+
+
+    <article
+      class="statement-col"
+      data-rev
+    >
+
+      <h3 class="serif word-reveal">
+        Time
+      </h3>
+
+      <p>
+        Astronomy is also archaeology. The farther
+        away an object is, the further back into
+        cosmic history its observed light can take us.
+      </p>
+
+    </article>
+
+
+  </div>
+
+</section>
+
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<footer>
+
+  <div class="footer-inner">
+
+    <div class="footer-brand">
+      Deep Space Archive
+    </div>
+
+    <div class="footer-copy">
+      An archive of the distant / 2026
+    </div>
+
+  </div>
+
+</footer>
+
+
+<script>
+
+/* =========================================================
+   UTILITIES
+========================================================= */
+
+const root =
+  document.documentElement;
+
+const clamp =
+  (v,min,max) =>
+    Math.min(max,Math.max(min,v));
+
+const lerp =
+  (a,b,t) =>
+    a+(b-a)*t;
+
+const ease =
+  t =>
+    t*t*(3-2*t);
+
+
+/* =========================================================
+   LAYOUT MODE
+   Single source of truth for "am I in the mobile layout".
+   Mirrors the 900px CSS breakpoint and drives html.is-mobile
+   so the desktop pin choreography can never leak into mobile.
+========================================================= */
+
+const mobileQuery =
+  window.matchMedia(
+    "(max-width:900px)"
+  );
+
+let MOBILE_LAYOUT =
+  mobileQuery.matches;
+
+
+function setLayoutMode(){
+
+  MOBILE_LAYOUT =
+    mobileQuery.matches;
+
+  root.classList.toggle(
+    "is-mobile",
+    MOBILE_LAYOUT
+  );
+
+  root.classList.toggle(
+    "is-desktop",
+    !MOBILE_LAYOUT
+  );
+}
+
+
+/* applied immediately, before first paint */
+
+setLayoutMode();
+
+
+function stageProgress(element){
+
+  if(!element)
+    return 0;
+
+  /* mobile uses natural document flow —
+     no pinned progress, no choreographed travel */
+
+  if(MOBILE_LAYOUT)
+    return 0;
+
+  const rect =
+    element.getBoundingClientRect();
+
+  const distance =
+    element.offsetHeight -
+    window.innerHeight;
+
+  if(distance<=0)
+    return 0;
+
+  return clamp(
+    -rect.top / distance,
+    0,
+    1
+  );
+}
+
+
+/* =========================================================
+   WORD SPLITTER
+========================================================= */
+
+function splitWords(){
+
+  document
+    .querySelectorAll(".word-reveal")
+    .forEach(element=>{
+
+      if(
+        element.dataset.split==="true"
+      )
+        return;
+
+      const walker =
+        document.createTreeWalker(
+          element,
+          NodeFilter.SHOW_TEXT
+        );
+
+      const nodes=[];
+
+      while(walker.nextNode())
+        nodes.push(walker.currentNode);
+
+      let index=0;
+
+      nodes.forEach(node=>{
+
+        const text=node.nodeValue;
+
+        if(!text.trim())
+          return;
+
+        const fragment=
+          document.createDocumentFragment();
+
+        text
+          .split(/(\s+)/)
+          .forEach(part=>{
+
+            if(/^\s+$/.test(part)){
+
+              fragment.appendChild(
+                document.createTextNode(part)
+              );
+
+              return;
+            }
+
+            const span=
+              document.createElement("span");
+
+            span.className="word";
+
+            span.style.setProperty(
+              "--word-index",
+              index++
+            );
+
+            span.textContent=part;
+
+            fragment.appendChild(span);
+          });
+
+        node.parentNode.replaceChild(
+          fragment,
+          node
+        );
+
+      });
+
+      element.dataset.split="true";
+
+    });
+}
+
+splitWords();
+
+
+/* =========================================================
+   REVEAL OBSERVER
+========================================================= */
+
+const revealObserver=
+  new IntersectionObserver(
+    entries=>{
+
+      entries.forEach(entry=>{
+
+        if(!entry.isIntersecting)
+          return;
+
+        entry.target.classList.add(
+          "is-visible"
+        );
+
+        entry.target.classList.add(
+          "revealed"
+        );
+
+        revealObserver.unobserve(
+          entry.target
+        );
+
+      });
+
+    },
+    {
+      threshold:.12
+    }
+  );
+
+
+document
+  .querySelectorAll(
+    "[data-rev],.word-reveal"
+  )
+  .forEach((element,index)=>{
+
+    if(
+      element.hasAttribute("data-rev")
+    ){
+
+      element.style.setProperty(
+        "--d",
+        `${40+(index%8)*45}ms`
+      );
+    }
+
+    revealObserver.observe(element);
+  });
+
+
+/* =========================================================
+   HERO STARFIELD
+========================================================= */
+
+const heroCanvas=
+  document.getElementById(
+    "heroCanvas"
+  );
+
+const heroCtx=
+  heroCanvas.getContext("2d");
+
+let heroW=0;
+let heroH=0;
+let heroDpr=1;
+
+const stars=[];
+
+for(let i=0;i<180;i++){
+
+  stars.push({
+
+    x:Math.random(),
+    y:Math.random(),
+
+    r:
+      Math.random()*
+      1.4+.25,
+
+    a:
+      Math.random()*.6+.15,
+
+    phase:
+      Math.random()*
+      Math.PI*2
+
+  });
+}
+
+
+function resizeHero(){
+
+  heroDpr=
+    Math.min(
+      window.devicePixelRatio||1,
+      2
+    );
+
+  heroW=
+    heroCanvas.clientWidth;
+
+  heroH=
+    heroCanvas.clientHeight;
+
+  heroCanvas.width=
+    Math.max(1,Math.round(heroW*heroDpr));
+
+  heroCanvas.height=
+    Math.max(1,Math.round(heroH*heroDpr));
+
+  heroCtx.setTransform(
+    heroDpr,0,0,heroDpr,0,0
+  );
+}
+
+
+function drawHero(time){
+
+  if(!heroW || !heroH)
+    return;
+
+  heroCtx.clearRect(
+    0,0,heroW,heroH
+  );
+
+  heroCtx.fillStyle=
+    "#090B0C";
+
+  heroCtx.fillRect(
+    0,0,heroW,heroH
+  );
+
+
+  stars.forEach(star=>{
+
+    const twinkle=
+      .5+
+      Math.sin(
+        time*.001+
+        star.phase
+      )*.5;
+
+    heroCtx.beginPath();
+
+    heroCtx.arc(
+      star.x*heroW,
+      star.y*heroH,
+      star.r,
+      0,
+      Math.PI*2
+    );
+
+    heroCtx.fillStyle=
+      `rgba(245,245,242,${
+        star.a*twinkle
+      })`;
+
+    heroCtx.fill();
+
+  });
+
+
+  for(let i=0;i<46;i++){
+
+    const y=
+      heroH*
+      (i+1)/47;
+
+    heroCtx.beginPath();
+
+    for(
+      let x=-40;
+      x<=heroW+40;
+      x+=8
+    ){
+
+      const wave1=
+        Math.sin(
+          x*.009+
+          i*.38+
+          time*.00016
+        )*
+        (6+i%5);
+
+      const wave2=
+        Math.sin(
+          x*.0025-
+          i*.19+
+          time*.00007
+        )*12;
+
+      const yy=
+        y+
+        wave1+
+        wave2;
+
+      if(x===-40)
+        heroCtx.moveTo(x,yy);
+      else
+        heroCtx.lineTo(x,yy);
+    }
+
+    heroCtx.lineWidth=1;
+
+    heroCtx.strokeStyle=
+      (i+1)%9===0
+      ? "rgba(185,229,243,.34)"
+      : "rgba(245,245,242,.075)";
+
+    heroCtx.stroke();
+
+  }
+}
+
+
+/* =========================================================
+   SPACE OBJECT PLATES
+========================================================= */
+
+const spaceCanvases=
+  document.querySelectorAll(
+    "[data-space]"
+  );
+
+const spaceObjects=[];
+
+spaceCanvases.forEach(canvas=>{
+
+  spaceObjects.push({
+
+    canvas,
+
+    ctx:
+      canvas.getContext("2d"),
+
+    index:
+      Number(
+        canvas.dataset.space
+      )
+  });
+
+});
+
+
+function resizeSpaceCanvas(canvas){
+
+  const dpr=
+    Math.min(
+      window.devicePixelRatio||1,
+      2
+    );
+
+  const w=
+    canvas.clientWidth;
+
+  const h=
+    canvas.clientHeight;
+
+  if(
+    canvas._plateW!==w ||
+    canvas._plateH!==h ||
+    canvas._plateD!==dpr
+  ){
+
+    canvas.width=
+      Math.max(1,Math.round(w*dpr));
+
+    canvas.height=
+      Math.max(1,Math.round(h*dpr));
+
+    canvas._plateW=w;
+    canvas._plateH=h;
+    canvas._plateD=dpr;
+  }
+
+  const ctx=
+    canvas.getContext("2d");
+
+  ctx.setTransform(
+    dpr,0,0,dpr,0,0
+  );
+
+  return {ctx,w,h};
+}
+
+
+/* =========================================================
+   PLATE SYSTEM
+========================================================= */
+
+const PL_TAU = Math.PI * 2;
+
+const PL_SMALL =
+  window.innerWidth < 780;
+
+
+function plCount(desktopCount, mobileCount) {
+
+  return PL_SMALL ? mobileCount : desktopCount;
+}
+
+
+let plSpare = null;
+
+function plGauss() {
+
+  if (plSpare !== null) {
+
+    const value = plSpare;
+
+    plSpare = null;
+
+    return value;
+  }
+
+  let u = 0;
+  let v = 0;
+  let s = 0;
+
+  do {
+
+    u = Math.random() * 2 - 1;
+    v = Math.random() * 2 - 1;
+
+    s = u * u + v * v;
+
+  } while (s === 0 || s >= 1);
+
+  const mul =
+    Math.sqrt(-2 * Math.log(s) / s);
+
+  plSpare = v * mul;
+
+  return u * mul;
+}
+
+
+function plSmooth(edge0, edge1, x) {
+
+  const t =
+    clamp((x - edge0) / (edge1 - edge0), 0, 1);
+
+  return t * t * (3 - 2 * t);
+}
+
+
+function plNoise(x, y, seed) {
+
+  return (
+    Math.sin(x * 1.7 + seed) *
+    Math.cos(y * 1.3 - seed * .7) +
+    .55 * Math.sin(x * 4.3 - y * 3.1 + seed * 2.2) +
+    .3 * Math.cos(x * 9.1 + y * 7.7 - seed * 1.4)
+  ) / 1.85;
+}
+
+
+function plOrder(colors, count, colorCount) {
+
+  const order = new Int32Array(count);
+
+  let cursor = 0;
+
+  for (let c = 0; c < colorCount; c++) {
+
+    for (let i = 0; i < count; i++) {
+
+      if (colors[i] === c)
+        order[cursor++] = i;
+    }
+  }
+
+  return order;
+}
+
+
+const plSoftCache = new Map();
+
+function plSoft(rgb) {
+
+  const cached = plSoftCache.get(rgb);
+
+  if (cached)
+    return cached;
+
+  const size = 26;
+
+  const sprite = document.createElement("canvas");
+
+  sprite.width = size;
+  sprite.height = size;
+
+  const sctx = sprite.getContext("2d");
+
+  const gradient =
+    sctx.createRadialGradient(
+      size / 2, size / 2, 0,
+      size / 2, size / 2, size / 2
+    );
+
+  gradient.addColorStop(0, "rgba(" + rgb + ",1)");
+  gradient.addColorStop(.3, "rgba(" + rgb + ",.46)");
+  gradient.addColorStop(.62, "rgba(" + rgb + ",.12)");
+  gradient.addColorStop(1, "rgba(" + rgb + ",0)");
+
+  sctx.fillStyle = gradient;
+
+  sctx.fillRect(0, 0, size, size);
+
+  plSoftCache.set(rgb, sprite);
+
+  return sprite;
+}
+
+
+const PL_GLOW = (function () {
+
+  const size = 34;
+
+  const sprite = document.createElement("canvas");
+
+  sprite.width = size;
+  sprite.height = size;
+
+  const sctx = sprite.getContext("2d");
+
+  const gradient =
+    sctx.createRadialGradient(
+      size / 2, size / 2, 0,
+      size / 2, size / 2, size / 2
+    );
+
+  gradient.addColorStop(0, "rgba(255,255,255,.92)");
+  gradient.addColorStop(.13, "rgba(230,242,248,.34)");
+  gradient.addColorStop(.36, "rgba(185,229,243,.1)");
+  gradient.addColorStop(1, "rgba(185,229,243,0)");
+
+  sctx.fillStyle = gradient;
+
+  sctx.fillRect(0, 0, size, size);
+
+  return sprite;
+})();
+
+
+function plBegin(ctx, w, h) {
+
+  ctx.globalCompositeOperation = "source-over";
+
+  ctx.globalAlpha = 1;
+
+  ctx.fillStyle = "#07080A";
+
+  ctx.fillRect(0, 0, w, h);
+
+  ctx.globalCompositeOperation = "lighter";
+}
+
+
+function plEnd(ctx) {
+
+  ctx.globalAlpha = 1;
+
+  ctx.globalCompositeOperation = "source-over";
+}
+
+
+let plLensX = 0;
+let plLensY = 0;
+let plLensGain = 1;
+
+function plLens(px, py, horizon, lensRadius, smear) {
+
+  plLensX = px;
+  plLensY = py;
+  plLensGain = 1;
+
+  const dist =
+    Math.sqrt(px * px + py * py);
+
+  if (dist >= lensRadius || dist < .0001)
+    return;
+
+  const u = dist / lensRadius;
+
+  const weight =
+    clamp((1 - u) / .45, 0, 1);
+
+  const bent =
+    horizon * 1.06 +
+    Math.pow(u, .46) * (lensRadius - horizon * 1.06);
+
+  const k =
+    (dist + (bent - dist) * weight) / dist;
+
+  const x = px * k;
+  const y = py * k;
+
+  const angle =
+    weight * smear * (y >= 0 ? 1 : -1);
+
+  const cs = Math.cos(angle);
+  const sn = Math.sin(angle);
+
+  plLensX = x * cs - y * sn;
+  plLensY = x * sn + y * cs;
+
+  plLensGain = 1 + weight * 1.15;
+}
+
+
+function plStarfield(count) {
+
+  const sx = new Float32Array(count);
+  const sy = new Float32Array(count);
+  const ss = new Float32Array(count);
+  const sa = new Float32Array(count);
+  const sp = new Float32Array(count);
+  const sc = new Uint8Array(count);
+  const sg = new Uint8Array(count);
+
+  for (let i = 0; i < count; i++) {
+
+    sx[i] = Math.random();
+    sy[i] = Math.random();
+
+    ss[i] = .26 + Math.pow(Math.random(), 3.1) * .95;
+
+    sa[i] = .06 + Math.pow(Math.random(), 2) * .42;
+
+    sp[i] = Math.random() * PL_TAU;
+
+    const roll = Math.random();
+
+    sc[i] = roll < .66 ? 0 : (roll < .92 ? 1 : 2);
+
+    sg[i] = Math.random() < .07 ? 1 : 0;
+  }
+
+  const order = plOrder(sc, count, 3);
+
+  return {
+
+    count,
+
+    draw(ctx, w, h, time, rgb, keepOut) {
+
+      let fill = -1;
+
+      for (let o = 0; o < count; o++) {
+
+        const i = order[o];
+
+        const x = sx[i] * w;
+        const y = sy[i] * h;
+
+        if (keepOut) {
+
+          const dx = x - keepOut.x;
+          const dy = y - keepOut.y;
+
+          if (dx * dx + dy * dy < keepOut.r * keepOut.r)
+            continue;
+        }
+
+        const alpha =
+          sa[i] *
+          (.88 + Math.sin(time * .0007 + sp[i]) * .12);
+
+        if (sg[i]) {
+
+          const gr = ss[i] * 3.2;
+
+          ctx.globalAlpha = alpha * .3;
+
+          ctx.drawImage(
+            PL_GLOW,
+            x - gr, y - gr,
+            gr * 2, gr * 2
+          );
+        }
+
+        if (sc[i] !== fill) {
+
+          fill = sc[i];
+
+          ctx.fillStyle = "rgb(" + rgb[fill] + ")";
+        }
+
+        ctx.globalAlpha = alpha;
+
+        const s = ss[i];
+
+        ctx.fillRect(x - s / 2, y - s / 2, s, s);
+      }
+    }
+  };
+}
+
+
+/* =========================================================
+   01 · SAGITTARIUS A*
+========================================================= */
+
+const SG_COUNT = plCount(3000, 1500);
+
+const SG_RGB = [
+  "244,244,241",
+  "180,220,240",
+  "255,190,140",
+  "255,232,206"
+];
+
+const SG_STAR_RGB = [
+  "244,244,241",
+  "180,220,240",
+  "255,206,168"
+];
+
+const SG_OMEGA = .00004;
+
+
+const SG_NODES = 18;
+
+const sgNodes = [];
+
+for (let n = 0; n < SG_NODES; n++) {
+
+  sgNodes.push({
+
+    t: .3 + Math.pow(Math.random(), 1.2) * .62,
+
+    a: Math.random() * PL_TAU,
+
+    tw: .016 + Math.random() * .045,
+
+    aw: .09 + Math.random() * .26,
+
+    weight: .3 + Math.random() * Math.random() * 1.7
+
+  });
+}
+
+
+let sgNodeTotal = 0;
+
+for (let n = 0; n < SG_NODES; n++)
+  sgNodeTotal += sgNodes[n].weight;
+
+
+function sgPickNode() {
+
+  let r = Math.random() * sgNodeTotal;
+
+  for (let n = 0; n < SG_NODES; n++) {
+
+    r -= sgNodes[n].weight;
+
+    if (r <= 0)
+      return sgNodes[n];
+  }
+
+  return sgNodes[SG_NODES - 1];
+}
+
+
+const sgT = new Float32Array(SG_COUNT);
+const sgA = new Float32Array(SG_COUNT);
+const sgSpeed = new Float32Array(SG_COUNT);
+const sgThick = new Float32Array(SG_COUNT);
+const sgSize = new Float32Array(SG_COUNT);
+const sgAlpha = new Float32Array(SG_COUNT);
+const sgOff = new Float32Array(SG_COUNT);
+const sgPhase = new Float32Array(SG_COUNT);
+const sgColor = new Uint8Array(SG_COUNT);
+const sgBright = new Uint8Array(SG_COUNT);
+const sgHalo = new Uint8Array(SG_COUNT);
+
+
+for (let i = 0; i < SG_COUNT; i++) {
+
+  const halo = Math.random() < .11;
+
+  sgHalo[i] = halo ? 1 : 0;
+
+  sgOff[i] = Math.random() * 1000;
+
+  sgPhase[i] = Math.random() * PL_TAU;
+
+
+  let t;
+
+  if (halo) {
+
+    t = .42 + Math.pow(Math.random(), .7) * .95;
+
+  } else {
+
+    t = .3 + Math.pow(Math.random(), 2.2) * .7;
+  }
+
+
+  let angle = Math.random() * PL_TAU;
+
+  const brightStar =
+    Math.random() < (halo ? .004 : .012);
+
+  let alpha;
+  let size;
+
+
+  if (!halo && Math.random() < .1) {
+
+    const node = sgPickNode();
+
+    t = clamp(node.t + plGauss() * node.tw, .3, 1.05);
+
+    angle = node.a + plGauss() * node.aw;
+
+    alpha = .34 + Math.random() * .44;
+
+    size = .42 + Math.pow(Math.random(), 2.1) * 1.1;
+
+  } else {
+
+    alpha =
+      halo
+        ? .04 + Math.random() * .1
+        : .09 + Math.random() * .38;
+
+    size = .28 + Math.pow(Math.random(), 2.8) * 1;
+  }
+
+
+  if (brightStar) {
+
+    alpha = .6 + Math.random() * .3;
+
+    size = .9 + Math.random() * .8;
+  }
+
+
+  sgT[i] = t;
+
+  sgA[i] = angle;
+
+  sgSpeed[i] =
+    Math.pow(t, -1.5) * (.84 + Math.random() * .32);
+
+  sgThick[i] = plGauss();
+
+  sgSize[i] = size;
+
+  sgAlpha[i] = alpha;
+
+
+  const roll = Math.random();
+
+  if (t < .44) {
+
+    sgColor[i] = roll < .62 ? 0 : (roll < .93 ? 1 : 3);
+
+  } else if (t < .72) {
+
+    sgColor[i] = roll < .42 ? 0 : (roll < .68 ? 3 : (roll < .94 ? 2 : 1));
+
+  } else {
+
+    sgColor[i] = roll < .34 ? 2 : (roll < .72 ? 3 : 0);
+  }
+
+  sgBright[i] = brightStar ? 1 : 0;
+}
+
+
+const sgOrder = plOrder(sgColor, SG_COUNT, 4);
+
+const sgStars = plStarfield(plCount(130, 75));
+
+
+function drawSagittarius(ctx, w, h, time) {
+
+  plBegin(ctx, w, h);
+
+  const cx = w / 2;
+
+  const cy = h * .5;
+
+  const minSide = Math.min(w, h);
+
+  const R = minSide * .4;
+
+  const horizon = R * .17;
+
+  const lensRadius = horizon * 3;
+
+  const squash = .235;
+
+  const tilt = -.17 + Math.sin(time * .000026) * .016;
+
+  const cosT = Math.cos(tilt);
+  const sinT = Math.sin(tilt);
+
+
+  sgStars.draw(
+    ctx, w, h, time,
+    SG_STAR_RGB,
+    { x: cx, y: cy, r: horizon * 1.35 }
+  );
+
+
+  let fill = -1;
+
+  for (let o = 0; o < SG_COUNT; o++) {
+
+    const i = sgOrder[o];
+
+    const t = sgT[i];
+
+    const halo = sgHalo[i];
+
+
+    let angle =
+      sgA[i] + time * sgSpeed[i] * SG_OMEGA;
+
+    angle +=
+      Math.sin(time * .00026 + sgOff[i]) *
+      .04 * (.4 + t);
+
+
+    const r =
+      t * R +
+      Math.sin(time * .00036 + sgOff[i] * 1.7) *
+      R * .006 * (.35 + t);
+
+
+    const thickness =
+      R * (.006 + .048 * Math.pow(t, 1.35)) *
+      (halo ? 2.7 : 1);
+
+    const dy0 =
+      Math.sin(angle) * r * squash +
+      sgThick[i] * thickness;
+
+    const dx0 = Math.cos(angle) * r;
+
+    let px = dx0 * cosT - dy0 * sinT;
+    let py = dx0 * sinT + dy0 * cosT;
+
+
+    plLens(px, py, horizon, lensRadius, .5 + t * .3);
+
+    px = plLensX;
+    py = plLensY;
+
+
+    const inner =
+      1 - clamp((t - .3) / .44, 0, 1);
+
+    const outerFade =
+      1 - clamp((t - .78) / .55, 0, 1) * .94;
+
+    const doppler =
+      clamp(
+        1 + .5 * Math.cos(angle) + .26 * Math.sin(angle),
+        .22,
+        2.1
+      );
+
+    const flicker =
+      sgBright[i]
+        ? .74 + Math.sin(time * .0018 + sgPhase[i]) * .26
+        : .89 + Math.sin(time * .0011 + sgPhase[i]) * .11;
+
+    let alpha =
+      sgAlpha[i] *
+      (.2 + inner * 1.55) *
+      outerFade *
+      doppler *
+      plLensGain *
+      flicker;
+
+    if (halo) alpha *= .72;
+
+    if (alpha <= .004)
+      continue;
+
+    if (alpha > .93) alpha = .93;
+
+
+    const fx = cx + px;
+    const fy = cy + py;
+
+    if (sgBright[i]) {
+
+      const gr =
+        sgSize[i] *
+        (2.7 + Math.sin(time * .0015 + sgPhase[i]) * .4);
+
+      ctx.globalAlpha = alpha * .32;
+
+      ctx.drawImage(PL_GLOW, fx - gr, fy - gr, gr * 2, gr * 2);
+    }
+
+
+    const colorIndex = sgColor[i];
+
+    if (colorIndex !== fill) {
+
+      fill = colorIndex;
+
+      ctx.fillStyle = "rgb(" + SG_RGB[colorIndex] + ")";
+    }
+
+    ctx.globalAlpha = alpha;
+
+    const s = sgSize[i] * (1 + inner * .3);
+
+    ctx.fillRect(fx - s / 2, fy - s / 2, s, s);
+  }
+
+
+  plEnd(ctx);
+}
+
+
+/* =========================================================
+   02 · TON 618 — QUASAR
+========================================================= */
+
+const QZ_DISK = plCount(1250, 650);
+const QZ_CORE = plCount(1000, 520);
+const QZ_JET = plCount(3300, 1650);
+const QZ_HAZE = plCount(230, 120);
+
+const QZ_RGB = [
+  "250,252,255",
+  "172,224,250",
+  "255,214,178"
+];
+
+const QZ_STAR_RGB = [
+  "246,248,250",
+  "172,224,250",
+  "255,214,178"
+];
+
+const QZ_OMEGA = .00013;
+
+
+const qzT = new Float32Array(QZ_DISK);
+const qzA = new Float32Array(QZ_DISK);
+const qzSpeed = new Float32Array(QZ_DISK);
+const qzThick = new Float32Array(QZ_DISK);
+const qzSize = new Float32Array(QZ_DISK);
+const qzAlpha = new Float32Array(QZ_DISK);
+const qzOff = new Float32Array(QZ_DISK);
+const qzPhase = new Float32Array(QZ_DISK);
+const qzDColor = new Uint8Array(QZ_DISK);
+const qzDBright = new Uint8Array(QZ_DISK);
+
+
+for (let i = 0; i < QZ_DISK; i++) {
+
+  qzT[i] = .24 + Math.pow(Math.random(), 2.35) * .78;
+
+  qzA[i] = Math.random() * PL_TAU;
+
+  qzSpeed[i] =
+    Math.pow(qzT[i], -1.6) * (.8 + Math.random() * .45);
+
+  qzThick[i] = plGauss();
+
+  qzOff[i] = Math.random() * 1000;
+
+  qzPhase[i] = Math.random() * PL_TAU;
+
+  const brightStar = Math.random() < .024;
+
+  qzDBright[i] = brightStar ? 1 : 0;
+
+  qzSize[i] =
+    brightStar
+      ? .95 + Math.random() * .8
+      : .26 + Math.pow(Math.random(), 2.6) * 1;
+
+  qzAlpha[i] =
+    brightStar
+      ? .8 + Math.random() * .2
+      : .24 + Math.random() * .62;
+
+  const roll = Math.random();
+
+  qzDColor[i] =
+    qzT[i] < .46
+      ? (roll < .5 ? 0 : (roll < .96 ? 1 : 2))
+      : (roll < .52 ? 0 : (roll < .88 ? 1 : 2));
+}
+
+
+const qzDOrder = plOrder(qzDColor, QZ_DISK, 3);
+
+
+const qzCR = new Float32Array(QZ_CORE);
+const qzCA = new Float32Array(QZ_CORE);
+const qzCSpeed = new Float32Array(QZ_CORE);
+const qzCFlat = new Float32Array(QZ_CORE);
+const qzCSize = new Float32Array(QZ_CORE);
+const qzCAlpha = new Float32Array(QZ_CORE);
+const qzCOff = new Float32Array(QZ_CORE);
+const qzCPhase = new Float32Array(QZ_CORE);
+const qzCFlick = new Float32Array(QZ_CORE);
+const qzCColor = new Uint8Array(QZ_CORE);
+const qzCBright = new Uint8Array(QZ_CORE);
+
+
+for (let i = 0; i < QZ_CORE; i++) {
+
+  qzCR[i] = Math.pow(Math.random(), 1.85) * .46;
+
+  qzCA[i] = Math.random() * PL_TAU;
+
+  qzCSpeed[i] =
+    (1.2 + Math.random() * 2.4) *
+    (Math.random() < .5 ? -1 : 1);
+
+  qzCFlat[i] = .32 + Math.random() * .8;
+
+  qzCOff[i] = Math.random() * 1000;
+
+  qzCPhase[i] = Math.random() * PL_TAU;
+
+  qzCFlick[i] = .0026 + Math.random() * .005;
+
+  const brightStar = Math.random() < .085;
+
+  qzCBright[i] = brightStar ? 1 : 0;
+
+  qzCSize[i] =
+    brightStar
+      ? .9 + Math.random() * .8
+      : .26 + Math.pow(Math.random(), 2.2) * .85;
+
+  qzCAlpha[i] =
+    brightStar
+      ? .84 + Math.random() * .16
+      : .44 + Math.random() * .56;
+
+  const roll = Math.random();
+
+  qzCColor[i] = roll < .6 ? 0 : (roll < .96 ? 1 : 2);
+}
+
+
+const qzCOrder = plOrder(qzCColor, QZ_CORE, 3);
+
+
+const qzU = new Float32Array(QZ_JET);
+const qzJSpeed = new Float32Array(QZ_JET);
+const qzSide = new Float32Array(QZ_JET);
+const qzLat = new Float32Array(QZ_JET);
+const qzW = new Float32Array(QZ_JET);
+const qzJSize = new Float32Array(QZ_JET);
+const qzJAlpha = new Float32Array(QZ_JET);
+const qzJOff = new Float32Array(QZ_JET);
+const qzJPhase = new Float32Array(QZ_JET);
+const qzJColor = new Uint8Array(QZ_JET);
+const qzJBright = new Uint8Array(QZ_JET);
+const qzScatter = new Uint8Array(QZ_JET);
+
+
+for (let i = 0; i < QZ_JET; i++) {
+
+  qzU[i] = Math.pow(Math.random(), 1.7);
+
+  const scattered = Math.random() < .19;
+
+  qzScatter[i] = scattered ? 1 : 0;
+
+  const fast = Math.random() < .06;
+
+  qzJSpeed[i] =
+    fast
+      ? .00034 + Math.random() * .00038
+      : scattered
+        ? .00012 + Math.random() * .00014
+        : .000045 + Math.random() * .00009;
+
+  qzSide[i] = Math.random() < .5 ? 1 : -1;
+
+  qzLat[i] =
+    scattered
+      ? plGauss() * 1.55
+      : plGauss() * .48;
+
+  qzW[i] =
+    scattered
+      ? 1.6 + Math.random() * 2
+      : .32 + Math.random() * .68;
+
+  qzJOff[i] = Math.random() * 100;
+
+  qzJPhase[i] = Math.random() * PL_TAU;
+
+  const brightStar = fast || Math.random() < .015;
+
+  qzJBright[i] = brightStar ? 1 : 0;
+
+  qzJSize[i] =
+    brightStar
+      ? .85 + Math.random() * .75
+      : .22 + Math.pow(Math.random(), 2.5) * .8;
+
+  qzJAlpha[i] =
+    brightStar
+      ? .76 + Math.random() * .24
+      : .28 + Math.random() * .64;
+
+  const roll = Math.random();
+
+  qzJColor[i] = roll < .44 ? 0 : (roll < .96 ? 1 : 2);
+}
+
+
+const qzJOrder = plOrder(qzJColor, QZ_JET, 3);
+
+
+const qzHA = new Float32Array(QZ_HAZE);
+const qzHR = new Float32Array(QZ_HAZE);
+const qzHSize = new Float32Array(QZ_HAZE);
+const qzHAlpha = new Float32Array(QZ_HAZE);
+const qzHPhase = new Float32Array(QZ_HAZE);
+const qzHColor = new Uint8Array(QZ_HAZE);
+
+
+for (let i = 0; i < QZ_HAZE; i++) {
+
+  qzHA[i] = Math.random() * PL_TAU;
+
+  qzHR[i] = .25 + Math.pow(Math.random(), .8) * 1.05;
+
+  qzHSize[i] = .05 + Math.random() * .1;
+
+  qzHAlpha[i] = .035 + Math.random() * .075;
+
+  qzHPhase[i] = Math.random() * PL_TAU;
+
+  qzHColor[i] = Math.random() < .82 ? 1 : 0;
+}
+
+
+const qzHOrder = plOrder(qzHColor, QZ_HAZE, 3);
+
+const qzStars = plStarfield(plCount(95, 55));
+
+
+function drawQuasar(ctx, w, h, time) {
+
+  plBegin(ctx, w, h);
+
+  const cx = w / 2;
+
+  const cy = h * .5;
+
+  const minSide = Math.min(w, h);
+
+  const R = minSide * .155;
+
+  const squash = .185;
+
+  const tilt = -.52 + Math.sin(time * .000024) * .04;
+
+  const cosT = Math.cos(tilt);
+  const sinT = Math.sin(tilt);
+
+  const axisX = -sinT;
+  const axisY = cosT;
+
+  const perpX = cosT;
+  const perpY = sinT;
+
+  const jetLen = h * .475;
+
+  const jetW = minSide * .082;
+
+
+  qzStars.draw(ctx, w, h, time, QZ_STAR_RGB, null);
+
+
+  let fill = -1;
+
+
+  for (let o = 0; o < QZ_JET; o++) {
+
+    const i = qzJOrder[o];
+
+    const u = (qzU[i] + time * qzJSpeed[i]) % 1;
+
+    const side = qzSide[i];
+
+    const len = R * .3 + u * jetLen;
+
+
+    const collimated =
+      jetW * (1.15 - u * .74) * qzW[i];
+
+    const scatter =
+      qzScatter[i]
+        ? jetW * u * 1.5 * qzW[i]
+        : 0;
+
+    const spread = collimated + scatter;
+
+    const lat =
+      qzLat[i] * spread +
+      Math.sin(time * .0005 + u * 9 + qzJOff[i]) *
+      spread * .34;
+
+
+    const bend =
+      Math.sin(u * 2.3 + .8) * jetW * 1.15 * u * u * side;
+
+
+    const px =
+      cx + axisX * len * side + perpX * (lat + bend);
+
+    const py =
+      cy + axisY * len * side + perpY * (lat + bend);
+
+
+    const nozzle = u < .03 ? u / .03 : 1;
+
+    const decay =
+      Math.pow(1 - u, .7) * (1 + (1 - u) * .55);
+
+    const knot =
+      clamp(
+        .6 +
+        .44 * Math.sin(u * 11.5 + qzJOff[i] * 2.1) +
+        .28 * Math.sin(u * 26.3 + qzJOff[i] * 5.4),
+        .1,
+        1.75
+      );
+
+    const flick =
+      qzJBright[i]
+        ? .68 + Math.sin(time * .005 + qzJPhase[i]) * .32
+        : .88 + Math.sin(time * .0023 + qzJPhase[i]) * .12;
+
+    const beam = side > 0 ? 1.2 : .76;
+
+    let alpha =
+      qzJAlpha[i] * nozzle * decay * knot * flick * beam;
+
+    if (alpha <= .004)
+      continue;
+
+    if (alpha > .98) alpha = .98;
+
+
+    if (qzJBright[i]) {
+
+      const gr = qzJSize[i] * 3.6;
+
+      ctx.globalAlpha = alpha * .42;
+
+      ctx.drawImage(PL_GLOW, px - gr, py - gr, gr * 2, gr * 2);
+    }
+
+
+    const colorIndex = qzJColor[i];
+
+    if (colorIndex !== fill) {
+
+      fill = colorIndex;
+
+      ctx.fillStyle = "rgb(" + QZ_RGB[colorIndex] + ")";
+    }
+
+    ctx.globalAlpha = alpha;
+
+    const s = qzJSize[i] * (1.3 - u * .5);
+
+    ctx.fillRect(px - s / 2, py - s / 2, s, s);
+  }
+
+
+  for (let o = 0; o < QZ_HAZE; o++) {
+
+    const i = qzHOrder[o];
+
+    const angle =
+      qzHA[i] + time * .00006 + Math.sin(time * .0004 + qzHPhase[i]) * .18;
+
+    const rr =
+      qzHR[i] * R *
+      (1 + Math.sin(time * .0009 + qzHPhase[i]) * .05);
+
+    const x = cx + Math.cos(angle) * rr;
+
+    const y = cy + Math.sin(angle) * rr * .78;
+
+    const alpha =
+      qzHAlpha[i] *
+      (.78 + Math.sin(time * .0016 + qzHPhase[i]) * .22) *
+      (1.35 - clamp(qzHR[i], 0, 1.3) * .45);
+
+    ctx.globalAlpha = alpha;
+
+    const radius = qzHSize[i] * minSide;
+
+    ctx.drawImage(
+      plSoft(QZ_RGB[qzHColor[i]]),
+      x - radius, y - radius,
+      radius * 2, radius * 2
+    );
+  }
+
+
+  fill = -1;
+
+
+  for (let o = 0; o < QZ_DISK; o++) {
+
+    const i = qzDOrder[o];
+
+    const t = qzT[i];
+
+    let angle = qzA[i] + time * qzSpeed[i] * QZ_OMEGA;
+
+    angle +=
+      Math.sin(time * .00048 + qzOff[i]) * .09 * (.4 + t);
+
+    const r =
+      t * R +
+      Math.sin(time * .0007 + qzOff[i] * 1.6) *
+      R * .013 * (.3 + t);
+
+    const thickness = R * (.012 + .055 * Math.pow(t, 1.25));
+
+    const dx0 = Math.cos(angle) * r;
+
+    const dy0 =
+      Math.sin(angle) * r * squash +
+      qzThick[i] * thickness;
+
+    const px = dx0 * cosT - dy0 * sinT;
+    const py = dx0 * sinT + dy0 * cosT;
+
+
+    const inner = 1 - clamp((t - .24) / .42, 0, 1);
+
+    const outerFade = 1 - clamp((t - .68) / .6, 0, 1) * .96;
+
+    const doppler =
+      clamp(
+        1 + .44 * Math.sin(angle) + .82 * Math.cos(angle),
+        .14,
+        2.7
+      );
+
+    const flicker =
+      qzDBright[i]
+        ? .7 + Math.sin(time * .0032 + qzPhase[i]) * .3
+        : .86 + Math.sin(time * .002 + qzPhase[i]) * .14;
+
+    let alpha =
+      qzAlpha[i] *
+      (.4 + inner * 2.15) *
+      outerFade *
+      doppler *
+      flicker;
+
+    if (alpha <= .004)
+      continue;
+
+    if (alpha > 1) alpha = 1;
+
+
+    const fx = cx + px;
+    const fy = cy + py;
+
+    if (qzDBright[i]) {
+
+      const gr =
+        qzSize[i] * (3.3 + Math.sin(time * .0026 + qzPhase[i]) * .5);
+
+      ctx.globalAlpha = alpha * .44;
+
+      ctx.drawImage(PL_GLOW, fx - gr, fy - gr, gr * 2, gr * 2);
+    }
+
+
+    const colorIndex = qzDColor[i];
+
+    if (colorIndex !== fill) {
+
+      fill = colorIndex;
+
+      ctx.fillStyle = "rgb(" + QZ_RGB[colorIndex] + ")";
+    }
+
+    ctx.globalAlpha = alpha;
+
+    const s = qzSize[i] * (1 + inner * .5);
+
+    ctx.fillRect(fx - s / 2, fy - s / 2, s, s);
+  }
+
+
+  for (let o = 0; o < QZ_CORE; o++) {
+
+    const i = qzCOrder[o];
+
+    const rr = qzCR[i] * R;
+
+    const angle =
+      qzCA[i] +
+      time * qzCSpeed[i] * QZ_OMEGA * 2.2 +
+      Math.sin(time * .0008 + qzCOff[i]) * .32;
+
+    const radial =
+      rr + Math.sin(time * .0014 + qzCPhase[i]) * R * .022;
+
+    const dx0 = Math.cos(angle) * radial;
+
+    const dy0 =
+      Math.sin(angle) * radial * qzCFlat[i] * squash * 2.5;
+
+    const px = dx0 * cosT - dy0 * sinT;
+    const py = dx0 * sinT + dy0 * cosT;
+
+
+    const centre =
+      1 + (1 - clamp(qzCR[i] / .46, 0, 1)) * 1.3;
+
+    const flick =
+      .62 + Math.sin(time * qzCFlick[i] + qzCPhase[i]) * .38;
+
+    let alpha = qzCAlpha[i] * centre * flick;
+
+    if (alpha <= .004)
+      continue;
+
+    if (alpha > 1) alpha = 1;
+
+
+    const fx = cx + px;
+    const fy = cy + py;
+
+    if (qzCBright[i]) {
+
+      const gr =
+        qzCSize[i] * (4.2 + Math.sin(time * .0034 + qzCPhase[i]) * .6);
+
+      ctx.globalAlpha = alpha * .5;
+
+      ctx.drawImage(PL_GLOW, fx - gr, fy - gr, gr * 2, gr * 2);
+    }
+
+
+    const colorIndex = qzCColor[i];
+
+    if (colorIndex !== fill) {
+
+      fill = colorIndex;
+
+      ctx.fillStyle = "rgb(" + QZ_RGB[colorIndex] + ")";
+    }
+
+    ctx.globalAlpha = alpha;
+
+    const s = qzCSize[i] * (1 + centre * .2);
+
+    ctx.fillRect(fx - s / 2, fy - s / 2, s, s);
+  }
+
+
+  plEnd(ctx);
+}
+
+
+/* =========================================================
+   03 · PILLARS OF CREATION
+========================================================= */
+
+const PI_SOFT = plCount(1500, 800);
+const PI_GRAIN = plCount(1900, 1000);
+const PI_AMBIENT = plCount(430, 230);
+const PI_ESC = plCount(230, 120);
+
+const PI_RGB = [
+  "104,113,126",
+  "142,155,169",
+  "178,201,220",
+  "232,236,234",
+  "255,224,196"
+];
+
+const PI_STAR_RGB = [
+  "246,247,245",
+  "186,214,232",
+  "255,224,196"
+];
+
+
+const PI_PILLARS = [
+  {
+    x: .19, wb: .365, top: .045,
+    lean: -.115, freq: 2.4, phase: .7,
+    amp: .092, weight: 1.18, puffs: 48
+  },
+  {
+    x: .52, wb: .29, top: .19,
+    lean: .072, freq: 1.9, phase: 2.6,
+    amp: .078, weight: 1, puffs: 42
+  },
+  {
+    x: .845, wb: .238, top: .33,
+    lean: .128, freq: 3.0, phase: 4.3,
+    amp: .064, weight: .86, puffs: 34
+  }
+];
+
+
+function piRagged(v, phase) {
+
+  return (
+    Math.sin(v * 8.9 + phase * 3.1) * .5 +
+    Math.sin(v * 19.7 + phase * 1.7) * .3 +
+    Math.sin(v * 3.9 + phase * 5.3) * .46 +
+    Math.sin(v * 34.3 + phase * 2.2) * .17
+  ) / 1.43;
+}
+
+
+function piCenterX(pillar, v) {
+
+  return (
+    pillar.x +
+    pillar.lean * v +
+    Math.sin(v * pillar.freq + pillar.phase) *
+      pillar.amp * v +
+    Math.sin(v * 6.1 + pillar.phase * 2.1) *
+      pillar.amp * .44 * v
+  );
+}
+
+
+function piWidth(pillar, v) {
+
+  const taper =
+    1 - .84 * Math.pow(clamp(v, 0, 1.05), 2.5);
+
+  const ragged =
+    .7 + .56 * (.5 + .5 * piRagged(v, pillar.phase));
+
+  return pillar.wb * taper * ragged;
+}
+
+
+const piPuffs = [];
+
+PI_PILLARS.forEach((pillar, pillarIndex) => {
+
+  for (let k = 0; k < pillar.puffs; k++) {
+
+    const v =
+      Math.pow(
+        (k + Math.random() * .9) / pillar.puffs,
+        .86
+      );
+
+    const widthAt = piWidth(pillar, v);
+
+    const r = widthAt * (.26 + Math.random() * .4);
+
+    piPuffs.push({
+
+      x: piCenterX(pillar, v) + plGauss() * widthAt * .24,
+
+      y: 1.08 - v * (1.08 - pillar.top),
+
+      r,
+
+      v,
+
+      pillar: pillarIndex,
+
+      weight:
+        r * r * (1.4 - v * .58) * (.6 + Math.random() * .9)
+
+    });
+  }
+
+
+  for (let f = 0; f < 7; f++) {
+
+    const v = .78 + Math.random() * .3;
+
+    const widthAt = piWidth(pillar, v);
+
+    const r = widthAt * (.12 + Math.random() * .2);
+
+    piPuffs.push({
+
+      x:
+        piCenterX(pillar, v) +
+        (Math.random() - .5) * widthAt * 1.5,
+
+      y: 1.08 - v * (1.08 - pillar.top),
+
+      r,
+
+      v,
+
+      pillar: pillarIndex,
+
+      weight: r * r * .8
+
+    });
+  }
+});
+
+
+for (let k = 0; k < 26; k++) {
+
+  const r = .1 + Math.random() * .16;
+
+  piPuffs.push({
+
+    x: Math.random(),
+
+    y: .9 + Math.random() * .18,
+
+    r,
+
+    v: -.05 + Math.random() * .14,
+
+    pillar: -1,
+
+    weight: r * r * 1.7 * (.6 + Math.random())
+  });
+}
+
+
+let piPuffTotal = 0;
+
+for (let i = 0; i < piPuffs.length; i++)
+  piPuffTotal += piPuffs[i].weight;
+
+
+function piPickPuff() {
+
+  let r = Math.random() * piPuffTotal;
+
+  for (let i = 0; i < piPuffs.length; i++) {
+
+    r -= piPuffs[i].weight;
+
+    if (r <= 0)
+      return piPuffs[i];
+  }
+
+  return piPuffs[piPuffs.length - 1];
+}
+
+
+function piSample(target) {
+
+  const puff = piPickPuff();
+
+  const tight = Math.random() < .34;
+
+  const spread = tight ? .32 : .82;
+
+  const x = puff.x + plGauss() * puff.r * spread;
+
+  const y = puff.y + plGauss() * puff.r * spread * .84;
+
+  const v = clamp(puff.v + plGauss() * .03, -.1, 1.2);
+
+  let u = 0;
+
+  if (puff.pillar >= 0) {
+
+    const pillar = PI_PILLARS[puff.pillar];
+
+    const vc = clamp(v, 0, 1.05);
+
+    const centerX = piCenterX(pillar, vc);
+
+    const widthAt = piWidth(pillar, vc);
+
+    u = widthAt > .0001
+      ? (x - centerX) / (widthAt * .5)
+      : 0;
+  }
+
+  target.x = x;
+  target.y = y;
+  target.v = v;
+  target.u = clamp(u, -2.4, 2.4);
+  target.puffR = puff.r;
+}
+
+
+const piSampleData = { x: 0, y: 0, v: 0, u: 0, puffR: 0 };
+
+
+const piSX = new Float32Array(PI_SOFT);
+const piSY = new Float32Array(PI_SOFT);
+const piSV = new Float32Array(PI_SOFT);
+const piSR = new Float32Array(PI_SOFT);
+const piSAlpha = new Float32Array(PI_SOFT);
+const piSOff = new Float32Array(PI_SOFT);
+const piSColor = new Uint8Array(PI_SOFT);
+
+
+for (let i = 0; i < PI_SOFT; i++) {
+
+  piSample(piSampleData);
+
+  piSX[i] = piSampleData.x;
+  piSY[i] = piSampleData.y;
+  piSV[i] = piSampleData.v;
+
+  piSR[i] =
+    (.014 + Math.random() * .03) *
+    (1.15 - clamp(piSampleData.v, 0, 1.2) * .45);
+
+  piSOff[i] = Math.random() * 1000;
+
+  const u = piSampleData.u;
+
+  let alpha =
+    (.055 + Math.random() * .1) *
+    (1.35 - clamp(piSampleData.v, 0, 1.2) * .5);
+
+  alpha *= clamp(1.28 - u * .52, .4, 1.8);
+
+  const edge = Math.abs(u);
+
+  if (edge > 1.1)
+    alpha *= clamp(1.6 - edge * .45, .16, 1);
+
+  piSAlpha[i] = alpha;
+
+
+  const roll = Math.random();
+
+  if (u < -.42) {
+
+    piSColor[i] =
+      roll < .34 ? 2 : (roll < .74 ? 3 : 4);
+
+  } else if (u > .46) {
+
+    piSColor[i] = roll < .88 ? 0 : 1;
+
+  } else {
+
+    piSColor[i] =
+      roll < .42 ? 1 : (roll < .78 ? 2 : (roll < .96 ? 3 : 0));
+  }
+}
+
+
+const piSOrder = plOrder(piSColor, PI_SOFT, 5);
+
+
+const piGX = new Float32Array(PI_GRAIN);
+const piGY = new Float32Array(PI_GRAIN);
+const piGV = new Float32Array(PI_GRAIN);
+const piGSize = new Float32Array(PI_GRAIN);
+const piGAlpha = new Float32Array(PI_GRAIN);
+const piGOff = new Float32Array(PI_GRAIN);
+const piGPhase = new Float32Array(PI_GRAIN);
+const piGColor = new Uint8Array(PI_GRAIN);
+const piGBright = new Uint8Array(PI_GRAIN);
+
+
+for (let i = 0; i < PI_GRAIN; i++) {
+
+  piSample(piSampleData);
+
+  piGX[i] = piSampleData.x;
+  piGY[i] = piSampleData.y;
+  piGV[i] = piSampleData.v;
+
+  piGOff[i] = Math.random() * 1000;
+
+  piGPhase[i] = Math.random() * PL_TAU;
+
+  const u = piSampleData.u;
+
+  const brightStar = Math.random() < .012;
+
+  piGBright[i] = brightStar ? 1 : 0;
+
+  piGSize[i] =
+    brightStar
+      ? 1 + Math.random() * .85
+      : .42 + Math.pow(Math.random(), 2.2) * 1.25;
+
+  let alpha =
+    brightStar
+      ? .76 + Math.random() * .24
+      : .18 + Math.random() * .56;
+
+  alpha *= 1.34 - clamp(piSampleData.v, 0, 1.2) * .54;
+
+  alpha *= clamp(1.24 - u * .5, .4, 1.8);
+
+  const edge = Math.abs(u);
+
+  if (edge > 1.05)
+    alpha *= clamp(1.55 - edge * .44, .18, 1);
+
+  piGAlpha[i] = alpha;
+
+
+  const roll = Math.random();
+
+  if (brightStar) {
+
+    piGColor[i] = roll < .72 ? 3 : 4;
+
+  } else if (u < -.4) {
+
+    piGColor[i] =
+      roll < .3 ? 2 : (roll < .7 ? 3 : 4);
+
+  } else if (u > .45) {
+
+    piGColor[i] = roll < .86 ? 0 : 1;
+
+  } else {
+
+    piGColor[i] =
+      roll < .4 ? 0 : (roll < .72 ? 1 : (roll < .94 ? 2 : 3));
+  }
+}
+
+
+const piGOrder = plOrder(piGColor, PI_GRAIN, 5);
+
+
+const piAX = new Float32Array(PI_AMBIENT);
+const piAY = new Float32Array(PI_AMBIENT);
+const piASize = new Float32Array(PI_AMBIENT);
+const piAAlpha = new Float32Array(PI_AMBIENT);
+const piAOff = new Float32Array(PI_AMBIENT);
+const piAColor = new Uint8Array(PI_AMBIENT);
+
+
+for (let i = 0; i < PI_AMBIENT; i++) {
+
+  piAX[i] = Math.random();
+
+  piAY[i] = Math.pow(Math.random(), .6);
+
+  piASize[i] = .008 + Math.pow(Math.random(), 2) * .02;
+
+  piAAlpha[i] = .02 + Math.pow(Math.random(), 1.7) * .055;
+
+  piAOff[i] = Math.random() * 1000;
+
+  const roll = Math.random();
+
+  piAColor[i] = roll < .58 ? 1 : (roll < .92 ? 2 : 0);
+}
+
+
+const piAOrder = plOrder(piAColor, PI_AMBIENT, 5);
+
+
+const piEX = new Float32Array(PI_ESC);
+const piEY = new Float32Array(PI_ESC);
+const piEDX = new Float32Array(PI_ESC);
+const piEDY = new Float32Array(PI_ESC);
+const piESpeed = new Float32Array(PI_ESC);
+const piEPhase = new Float32Array(PI_ESC);
+const piESize = new Float32Array(PI_ESC);
+const piEAlpha = new Float32Array(PI_ESC);
+const piEColor = new Uint8Array(PI_ESC);
+
+
+for (let i = 0; i < PI_ESC; i++) {
+
+  const pillar =
+    PI_PILLARS[Math.floor(Math.random() * PI_PILLARS.length)];
+
+  const v = .3 + Math.random() * .78;
+
+  const centerX = piCenterX(pillar, v);
+
+  const widthAt = piWidth(pillar, v);
+
+  const side = Math.random() < .5 ? -1 : 1;
+
+  piEX[i] =
+    centerX + side * widthAt * (.2 + Math.random() * .62);
+
+  piEY[i] = 1.08 - v * (1.08 - pillar.top);
+
+  piEDX[i] = side * (.045 + Math.random() * .13);
+
+  piEDY[i] = -(.05 + Math.random() * .19);
+
+  piESpeed[i] = .000014 + Math.random() * .00004;
+
+  piEPhase[i] = Math.random();
+
+  piESize[i] = .26 + Math.random() * .6;
+
+  piEAlpha[i] = .14 + Math.random() * .42;
+
+  const roll = Math.random();
+
+  piEColor[i] = roll < .46 ? 2 : (roll < .88 ? 1 : 3);
+}
+
+
+const piEOrder = plOrder(piEColor, PI_ESC, 5);
+
+
+const piStars = plStarfield(plCount(135, 75));
+
+
+function drawPillars(ctx, w, h, time) {
+
+  plBegin(ctx, w, h);
+
+  let fill = -1;
+
+
+  for (let o = 0; o < PI_AMBIENT; o++) {
+
+    const i = piAOrder[o];
+
+    const x =
+      piAX[i] * w +
+      Math.sin(time * .00007 + piAOff[i]) * w * .014;
+
+    const y =
+      piAY[i] * h +
+      Math.cos(time * .00005 + piAOff[i] * 1.4) * h * .011;
+
+    const alpha =
+      piAAlpha[i] *
+      (.85 + Math.sin(time * .0008 + piAOff[i]) * .15);
+
+    const radius = piASize[i] * w;
+
+    ctx.globalAlpha = alpha;
+
+    ctx.drawImage(
+      plSoft(PI_RGB[piAColor[i]]),
+      x - radius, y - radius,
+      radius * 2, radius * 2
+    );
+  }
+
+
+  for (let o = 0; o < PI_SOFT; o++) {
+
+    const i = piSOrder[o];
+
+    const v = clamp(piSV[i], -.1, 1.2);
+
+    const sway = (.14 + v * 1.05);
+
+    const x =
+      piSX[i] * w +
+      Math.sin(time * .00007 + piSOff[i]) * w * .009 * sway +
+      Math.sin(time * .00019 + piSOff[i] * 1.7) * w * .004 * sway;
+
+    const y =
+      piSY[i] * h +
+      Math.cos(time * .00006 + piSOff[i] * 1.3) * h * .007 * sway;
+
+    const radius =
+      piSR[i] * w *
+      (1 + Math.sin(time * .00013 + piSOff[i]) * .05);
+
+    const alpha =
+      piSAlpha[i] *
+      (.9 + Math.sin(time * .0006 + piSOff[i]) * .1);
+
+    if (alpha <= .003)
+      continue;
+
+    ctx.globalAlpha = alpha;
+
+    ctx.drawImage(
+      plSoft(PI_RGB[piSColor[i]]),
+      x - radius, y - radius,
+      radius * 2, radius * 2
+    );
+  }
+
+
+  for (let o = 0; o < PI_GRAIN; o++) {
+
+    const i = piGOrder[o];
+
+    const v = clamp(piGV[i], -.1, 1.2);
+
+    const sway = (.14 + v * 1.1);
+
+    const x =
+      piGX[i] * w +
+      Math.sin(time * .00008 + piGOff[i]) * w * .009 * sway +
+      Math.sin(time * .00021 + piGPhase[i]) * w * .0038 * sway;
+
+    const y =
+      piGY[i] * h +
+      Math.cos(time * .000065 + piGOff[i] * 1.6) * h * .0065 * sway;
+
+    const flicker =
+      piGBright[i]
+        ? .76 + Math.sin(time * .0021 + piGPhase[i]) * .24
+        : .92 + Math.sin(time * .001 + piGPhase[i]) * .08;
+
+    let alpha = piGAlpha[i] * flicker;
+
+    if (alpha <= .004)
+      continue;
+
+    if (alpha > .97) alpha = .97;
+
+
+    if (piGBright[i]) {
+
+      const gr =
+        piGSize[i] *
+        (3.4 + Math.sin(time * .0017 + piGPhase[i]) * .45);
+
+      ctx.globalAlpha = alpha * .4;
+
+      ctx.drawImage(PL_GLOW, x - gr, y - gr, gr * 2, gr * 2);
+    }
+
+
+    const colorIndex = piGColor[i];
+
+    if (colorIndex !== fill) {
+
+      fill = colorIndex;
+
+      ctx.fillStyle = "rgb(" + PI_RGB[colorIndex] + ")";
+    }
+
+    ctx.globalAlpha = alpha;
+
+    const s = piGSize[i];
+
+    ctx.fillRect(x - s / 2, y - s / 2, s, s);
+  }
+
+
+  fill = -1;
+
+
+  for (let o = 0; o < PI_ESC; o++) {
+
+    const i = piEOrder[o];
+
+    const p = (piEPhase[i] + time * piESpeed[i]) % 1;
+
+    const x = (piEX[i] + piEDX[i] * p) * w;
+
+    const y = (piEY[i] + piEDY[i] * p) * h;
+
+    const life = Math.sin(Math.PI * p);
+
+    const alpha = piEAlpha[i] * life * life;
+
+    if (alpha <= .004)
+      continue;
+
+    const colorIndex = piEColor[i];
+
+    if (colorIndex !== fill) {
+
+      fill = colorIndex;
+
+      ctx.fillStyle = "rgb(" + PI_RGB[colorIndex] + ")";
+    }
+
+    ctx.globalAlpha = alpha;
+
+    const s = piESize[i] * (1 - p * .35);
+
+    ctx.fillRect(x - s / 2, y - s / 2, s, s);
+  }
+
+
+  piStars.draw(ctx, w, h, time, PI_STAR_RGB, null);
+
+  plEnd(ctx);
+}
+
+
+/* =========================================================
+   04 · ʻOUMUAMUA
+========================================================= */
+
+const OU_SOFT = plCount(950, 500);
+const OU_GRAIN = plCount(1500, 800);
+const OU_RIM = plCount(320, 170);
+const OU_TRAIL = plCount(250, 130);
+const OU_DUST = plCount(140, 80);
+
+const OU_RGB = [
+  "88,93,101",
+  "124,131,140",
+  "170,179,188",
+  "244,245,242",
+  "255,226,196"
+];
+
+const OU_STAR_RGB = [
+  "244,245,242",
+  "180,214,236",
+  "255,226,196"
+];
+
+
+function ouProfile(s) {
+
+  const a = Math.abs(s);
+
+  const base =
+    Math.pow(
+      Math.max(0, 1 - Math.pow(a, 1.68)),
+      .56
+    );
+
+  const lumps =
+    1 +
+    .22 * Math.sin(s * 3.1 + .9) +
+    .16 * Math.sin(s * 7.4 + 2.4) +
+    .1 * Math.sin(s * 15.2 + 5.1) +
+    .06 * Math.sin(s * 29.8 + 1.3);
+
+  const asym =
+    s < 0
+      ? 1 + .3 * (1 - a)
+      : 1 - .15 * (1 - a);
+
+  const neck =
+    1 - .22 * Math.exp(-Math.pow((s - .2) / .12, 2));
+
+  return Math.max(0, base * lumps * asym * neck);
+}
+
+
+const OU_NODES = 13;
+
+const ouNodes = [];
+
+for (let n = 0; n < OU_NODES; n++) {
+
+  ouNodes.push({
+
+    s: Math.random() * 1.7 - .85,
+
+    n: (Math.random() * 2 - 1) * .7,
+
+    sw: .05 + Math.random() * .12,
+
+    nw: .1 + Math.random() * .22,
+
+    weight: .4 + Math.random() * Math.random() * 1.9
+
+  });
+}
+
+
+let ouNodeTotal = 0;
+
+for (let n = 0; n < OU_NODES; n++)
+  ouNodeTotal += ouNodes[n].weight;
+
+
+function ouPickNode() {
+
+  let r = Math.random() * ouNodeTotal;
+
+  for (let n = 0; n < OU_NODES; n++) {
+
+    r -= ouNodes[n].weight;
+
+    if (r <= 0)
+      return ouNodes[n];
+  }
+
+  return ouNodes[OU_NODES - 1];
+}
+
+
+function ouSample() {
+
+  let s = Math.random() * 2 - 1;
+
+  let n;
+
+  const roll = Math.random();
+
+  if (roll < .22) {
+
+    const node = ouPickNode();
+
+    s = clamp(s * .35 + node.s, -.99, .99);
+
+    n = clamp(node.n + plGauss() * node.nw, -1.14, 1.14);
+
+  } else if (roll < .74) {
+
+    n = (Math.random() * 2 - 1) * .84;
+
+  } else if (roll < .88) {
+
+    n = plGauss() * .26;
+
+  } else {
+
+    n =
+      (Math.random() < .5 ? -1 : 1) *
+      (.74 + Math.random() * .38);
+  }
+
+  return { s, n, prof: ouProfile(s) };
+}
+
+
+const ouSS = new Float32Array(OU_SOFT);
+const ouSN = new Float32Array(OU_SOFT);
+const ouSP = new Float32Array(OU_SOFT);
+const ouSZ = new Float32Array(OU_SOFT);
+const ouSR = new Float32Array(OU_SOFT);
+const ouSAlpha = new Float32Array(OU_SOFT);
+const ouSOff = new Float32Array(OU_SOFT);
+const ouSColor = new Uint8Array(OU_SOFT);
+
+
+for (let i = 0; i < OU_SOFT; i++) {
+
+  const sample = ouSample();
+
+  ouSS[i] = sample.s;
+  ouSN[i] = sample.n;
+  ouSP[i] = sample.prof;
+
+  ouSZ[i] = plGauss() * .4;
+
+  ouSR[i] = .008 + Math.pow(Math.random(), 1.6) * .017;
+
+  ouSOff[i] = Math.random() * 1000;
+
+  ouSAlpha[i] = .05 + Math.random() * .085;
+
+  const roll = Math.random();
+
+  ouSColor[i] =
+    sample.n < -.45
+      ? (roll < .55 ? 2 : 1)
+      : (roll < .74 ? 0 : 1);
+}
+
+
+const ouSOrder = plOrder(ouSColor, OU_SOFT, 5);
+
+
+const ouGS = new Float32Array(OU_GRAIN);
+const ouGN = new Float32Array(OU_GRAIN);
+const ouGP = new Float32Array(OU_GRAIN);
+const ouGZ = new Float32Array(OU_GRAIN);
+const ouGSize = new Float32Array(OU_GRAIN);
+const ouGAlpha = new Float32Array(OU_GRAIN);
+const ouGOff = new Float32Array(OU_GRAIN);
+const ouGPhase = new Float32Array(OU_GRAIN);
+const ouGColor = new Uint8Array(OU_GRAIN);
+
+
+for (let i = 0; i < OU_GRAIN; i++) {
+
+  const sample = ouSample();
+
+  ouGS[i] = sample.s;
+  ouGN[i] = sample.n;
+  ouGP[i] = sample.prof;
+
+  ouGZ[i] = plGauss() * .4;
+
+  ouGOff[i] = Math.random() * 1000;
+
+  ouGPhase[i] = Math.random() * PL_TAU;
+
+  const edge = Math.abs(sample.n) > .62;
+
+  ouGSize[i] =
+    edge
+      ? .42 + Math.pow(Math.random(), 2) * .8
+      : .5 + Math.pow(Math.random(), 2.2) * .9;
+
+  ouGAlpha[i] =
+    edge
+      ? .16 + Math.random() * .42
+      : .08 + Math.random() * .26;
+
+  const roll = Math.random();
+
+  ouGColor[i] =
+    sample.n < -.5
+      ? (roll < .4 ? 2 : (roll < .8 ? 1 : 3))
+      : (roll < .78 ? 0 : 1);
+}
+
+
+const ouGOrder = plOrder(ouGColor, OU_GRAIN, 5);
+
+
+const ouRS = new Float32Array(OU_RIM);
+const ouRN = new Float32Array(OU_RIM);
+const ouRP = new Float32Array(OU_RIM);
+const ouRSize = new Float32Array(OU_RIM);
+const ouRAlpha = new Float32Array(OU_RIM);
+const ouRPhase = new Float32Array(OU_RIM);
+const ouRColor = new Uint8Array(OU_RIM);
+const ouRBright = new Uint8Array(OU_RIM);
+
+
+for (let i = 0; i < OU_RIM; i++) {
+
+  const s = Math.random() * 1.9 - .95;
+
+  ouRS[i] = s;
+
+  ouRN[i] = -(.72 + Math.random() * .38);
+
+  ouRP[i] = ouProfile(s);
+
+  ouRPhase[i] = Math.random() * PL_TAU;
+
+  const brightStar = Math.random() < .05;
+
+  ouRBright[i] = brightStar ? 1 : 0;
+
+  ouRSize[i] =
+    brightStar
+      ? .9 + Math.random() * .7
+      : .34 + Math.pow(Math.random(), 2) * .7;
+
+  ouRAlpha[i] =
+    brightStar
+      ? .72 + Math.random() * .28
+      : .3 + Math.random() * .6;
+
+  const roll = Math.random();
+
+  ouRColor[i] = roll < .46 ? 3 : (roll < .84 ? 2 : 4);
+}
+
+
+const ouROrder = plOrder(ouRColor, OU_RIM, 5);
+
+
+const ouTU = new Float32Array(OU_TRAIL);
+const ouTSpeed = new Float32Array(OU_TRAIL);
+const ouTLat = new Float32Array(OU_TRAIL);
+const ouTW = new Float32Array(OU_TRAIL);
+const ouTSize = new Float32Array(OU_TRAIL);
+const ouTAlpha = new Float32Array(OU_TRAIL);
+const ouTOff = new Float32Array(OU_TRAIL);
+const ouTColor = new Uint8Array(OU_TRAIL);
+
+
+for (let i = 0; i < OU_TRAIL; i++) {
+
+  ouTU[i] = Math.pow(Math.random(), .75);
+
+  ouTSpeed[i] = .000016 + Math.random() * .00004;
+
+  ouTLat[i] = plGauss() * .55;
+
+  ouTW[i] = Math.random() < .12 ? 1.9 : .4 + Math.random();
+
+  ouTSize[i] = .2 + Math.pow(Math.random(), 2.6) * .5;
+
+  ouTAlpha[i] = .018 + Math.random() * .065;
+
+  ouTOff[i] = Math.random() * 100;
+
+  const roll = Math.random();
+
+  ouTColor[i] = roll < .6 ? 2 : (roll < .95 ? 1 : 0);
+}
+
+
+const ouTOrder = plOrder(ouTColor, OU_TRAIL, 5);
+
+
+const ouDX = new Float32Array(OU_DUST);
+const ouDY = new Float32Array(OU_DUST);
+const ouDSize = new Float32Array(OU_DUST);
+const ouDAlpha = new Float32Array(OU_DUST);
+const ouDOff = new Float32Array(OU_DUST);
+const ouDColor = new Uint8Array(OU_DUST);
+
+
+for (let i = 0; i < OU_DUST; i++) {
+
+  ouDX[i] = Math.random();
+
+  ouDY[i] = Math.random();
+
+  ouDSize[i] = .22 + Math.pow(Math.random(), 2.8) * .55;
+
+  ouDAlpha[i] = .035 + Math.pow(Math.random(), 1.9) * .13;
+
+  ouDOff[i] = Math.random() * 1000;
+
+  ouDColor[i] = Math.random() < .62 ? 1 : 2;
+}
+
+
+const ouDOrder = plOrder(ouDColor, OU_DUST, 5);
+
+
+const ouStars = plStarfield(plCount(105, 60));
+
+
+function drawOumuamua(ctx, w, h, time) {
+
+  plBegin(ctx, w, h);
+
+  let fill = -1;
+
+
+  ouStars.draw(ctx, w, h, time, OU_STAR_RGB, null);
+
+
+  for (let o = 0; o < OU_DUST; o++) {
+
+    const i = ouDOrder[o];
+
+    const x =
+      ouDX[i] * w +
+      Math.sin(time * .00006 + ouDOff[i]) * w * .014;
+
+    const y =
+      ouDY[i] * h +
+      Math.cos(time * .000045 + ouDOff[i] * 1.5) * h * .011;
+
+    const colorIndex = ouDColor[i];
+
+    if (colorIndex !== fill) {
+
+      fill = colorIndex;
+
+      ctx.fillStyle = "rgb(" + OU_RGB[colorIndex] + ")";
+    }
+
+    ctx.globalAlpha =
+      ouDAlpha[i] *
+      (.84 + Math.sin(time * .0007 + ouDOff[i]) * .16);
+
+    const s = ouDSize[i];
+
+    ctx.fillRect(x - s / 2, y - s / 2, s, s);
+  }
+
+
+  const theta = time * .000038;
+
+  const bodyX = w * (.5 + .045 * Math.sin(theta));
+
+  const bodyY = h * (.47 + .03 * Math.sin(theta * .77 + 1.1));
+
+
+  let vx = .045 * Math.cos(theta) * w;
+
+  let vy = .03 * Math.cos(theta * .77 + 1.1) * .77 * h;
+
+  const vmag = Math.sqrt(vx * vx + vy * vy) || 1;
+
+  vx /= vmag;
+
+  vy /= vmag;
+
+  const trailStrength =
+    clamp(Math.abs(Math.cos(theta)) * 1.8, .1, 1);
+
+  const trailLen = w * .46 * trailStrength;
+
+
+  fill = -1;
+
+  for (let o = 0; o < OU_TRAIL; o++) {
+
+    const i = ouTOrder[o];
+
+    const p = (ouTU[i] + time * ouTSpeed[i]) % 1;
+
+    const d = p * trailLen;
+
+    const spread = w * .008 * (.18 + p * 2.2) * ouTW[i];
+
+    const lat =
+      ouTLat[i] * spread +
+      Math.sin(time * .00036 + p * 6 + ouTOff[i]) *
+      spread * .4;
+
+    const x = bodyX - vx * d - vy * lat;
+
+    const y = bodyY - vy * d + vx * lat;
+
+    const alpha =
+      ouTAlpha[i] * Math.pow(1 - p, 1.55) * trailStrength;
+
+    if (alpha <= .003)
+      continue;
+
+    const colorIndex = ouTColor[i];
+
+    if (colorIndex !== fill) {
+
+      fill = colorIndex;
+
+      ctx.fillStyle = "rgb(" + OU_RGB[colorIndex] + ")";
+    }
+
+    ctx.globalAlpha = alpha;
+
+    const s = ouTSize[i] * (1 - p * .4);
+
+    ctx.fillRect(x - s / 2, y - s / 2, s, s);
+  }
+
+
+  const rot = -.42 + Math.sin(time * .000034) * .09;
+
+  const cosR = Math.cos(rot);
+  const sinR = Math.sin(rot);
+
+  const latX = -sinR;
+  const latY = cosR;
+
+  const lightX = -.68;
+  const lightY = -.73;
+
+  const bodyLen =
+    w * .172 * (.96 + .04 * Math.sin(time * .00006));
+
+  const bodyThick =
+    w * .044 * (.8 + .2 * Math.cos(time * .000095));
+
+
+  for (let o = 0; o < OU_SOFT; o++) {
+
+    const i = ouSOrder[o];
+
+    const n = ouSN[i];
+
+    const ax = ouSS[i] * bodyLen;
+
+    const lat = n * ouSP[i] * bodyThick;
+
+    let x = ax * cosR - lat * sinR;
+    let y = ax * sinR + lat * cosR;
+
+    x += ouSZ[i] * bodyThick * .3;
+    y += ouSZ[i] * bodyThick * .18;
+
+    x += Math.sin(time * .00026 + ouSOff[i]) * .4;
+    y += Math.cos(time * .00022 + ouSOff[i] * 1.7) * .32;
+
+    const sgn = n >= 0 ? 1 : -1;
+
+    const diffuse =
+      clamp(latX * sgn * lightX + latY * sgn * lightY, 0, 1);
+
+    const shade =
+      (.42 + diffuse * 1.35) *
+      (1 - Math.min(1, Math.abs(ouSZ[i]) * .5));
+
+    const alpha =
+      ouSAlpha[i] * shade *
+      (.9 + Math.sin(time * .0008 + ouSOff[i]) * .1);
+
+    if (alpha <= .003)
+      continue;
+
+    const radius = ouSR[i] * w;
+
+    ctx.globalAlpha = alpha;
+
+    ctx.drawImage(
+      plSoft(OU_RGB[ouSColor[i]]),
+      bodyX + x - radius,
+      bodyY + y - radius,
+      radius * 2,
+      radius * 2
+    );
+  }
+
+
+  fill = -1;
+
+  for (let o = 0; o < OU_GRAIN; o++) {
+
+    const i = ouGOrder[o];
+
+    const n = ouGN[i];
+
+    const ax = ouGS[i] * bodyLen;
+
+    const lat = n * ouGP[i] * bodyThick;
+
+    let x = ax * cosR - lat * sinR;
+    let y = ax * sinR + lat * cosR;
+
+    x += ouGZ[i] * bodyThick * .3;
+    y += ouGZ[i] * bodyThick * .18;
+
+    x += Math.sin(time * .00028 + ouGOff[i]) * .36;
+    y += Math.cos(time * .00024 + ouGOff[i] * 1.7) * .3;
+
+    const sgn = n >= 0 ? 1 : -1;
+
+    const diffuse =
+      clamp(latX * sgn * lightX + latY * sgn * lightY, 0, 1);
+
+    const shade =
+      (.4 + diffuse * 1.4) *
+      (1 - Math.min(1, Math.abs(ouGZ[i]) * .5));
+
+    const alpha =
+      ouGAlpha[i] * shade *
+      (.94 + Math.sin(time * .0009 + ouGPhase[i]) * .06);
+
+    if (alpha <= .003)
+      continue;
+
+    const colorIndex = ouGColor[i];
+
+    if (colorIndex !== fill) {
+
+      fill = colorIndex;
+
+      ctx.fillStyle = "rgb(" + OU_RGB[colorIndex] + ")";
+    }
+
+    ctx.globalAlpha = alpha;
+
+    const s = ouGSize[i];
+
+    ctx.fillRect(
+      bodyX + x - s / 2,
+      bodyY + y - s / 2,
+      s,
+      s
+    );
+  }
+
+
+  fill = -1;
+
+  for (let o = 0; o < OU_RIM; o++) {
+
+    const i = ouROrder[o];
+
+    const ax = ouRS[i] * bodyLen;
+
+    const lat = ouRN[i] * ouRP[i] * bodyThick;
+
+    let x = ax * cosR - lat * sinR;
+    let y = ax * sinR + lat * cosR;
+
+    x += Math.sin(time * .0003 + ouRPhase[i]) * .3;
+    y += Math.cos(time * .00026 + ouRPhase[i] * 1.4) * .26;
+
+    const taper = ouRP[i];
+
+    const flicker =
+      ouRBright[i]
+        ? .74 + Math.sin(time * .0019 + ouRPhase[i]) * .26
+        : .92 + Math.sin(time * .0011 + ouRPhase[i]) * .08;
+
+    let alpha =
+      ouRAlpha[i] * (.35 + taper * .85) * flicker;
+
+    if (alpha <= .004)
+      continue;
+
+    if (alpha > .98) alpha = .98;
+
+    const fx = bodyX + x;
+    const fy = bodyY + y;
+
+    if (ouRBright[i]) {
+
+      const gr =
+        ouRSize[i] * (3 + Math.sin(time * .0016 + ouRPhase[i]) * .4);
+
+      ctx.globalAlpha = alpha * .4;
+
+      ctx.drawImage(PL_GLOW, fx - gr, fy - gr, gr * 2, gr * 2);
+    }
+
+
+    const colorIndex = ouRColor[i];
+
+    if (colorIndex !== fill) {
+
+      fill = colorIndex;
+
+      ctx.fillStyle = "rgb(" + OU_RGB[colorIndex] + ")";
+    }
+
+    ctx.globalAlpha = alpha;
+
+    const s = ouRSize[i];
+
+    ctx.fillRect(fx - s / 2, fy - s / 2, s, s);
+  }
+
+
+  plEnd(ctx);
+}
+
+
+/* =========================================================
+   05 · KEPLER-452b — DISTANT EXOPLANET
+========================================================= */
+
+const KP_SOFT = plCount(1050, 560);
+const KP_GRAIN = plCount(1350, 720);
+const KP_CLOUD = plCount(300, 160);
+const KP_ATMOS = plCount(430, 230);
+const KP_SUN = plCount(58, 34);
+
+const KP_RGB = [
+  "82,90,102",
+  "122,132,146",
+  "168,180,192",
+  "228,234,238",
+  "140,200,238",
+  "255,230,204"
+];
+
+const KP_STAR_RGB = [
+  "244,246,248",
+  "170,214,240",
+  "255,230,204"
+];
+
+
+function kpSpherePoint(target) {
+
+  const u = Math.random() * 2 - 1;
+
+  const phi = Math.random() * PL_TAU;
+
+  const sr = Math.sqrt(Math.max(0, 1 - u * u));
+
+  target.x = sr * Math.cos(phi);
+  target.y = u;
+  target.z = sr * Math.sin(phi);
+}
+
+
+const kpPoint = { x: 0, y: 0, z: 0 };
+
+
+const kpSNX = new Float32Array(KP_SOFT);
+const kpSNY = new Float32Array(KP_SOFT);
+const kpSNZ = new Float32Array(KP_SOFT);
+const kpSRad = new Float32Array(KP_SOFT);
+const kpSRR = new Float32Array(KP_SOFT);
+const kpSAlpha = new Float32Array(KP_SOFT);
+const kpSTone = new Float32Array(KP_SOFT);
+const kpSColor = new Uint8Array(KP_SOFT);
+
+
+for (let i = 0; i < KP_SOFT; i++) {
+
+  kpSpherePoint(kpPoint);
+
+  kpSNX[i] = kpPoint.x;
+  kpSNY[i] = kpPoint.y;
+  kpSNZ[i] = kpPoint.z;
+
+  kpSRad[i] = .982 + Math.random() * .024;
+
+  kpSRR[i] = .05 + Math.pow(Math.random(), 1.5) * .085;
+
+  kpSAlpha[i] = .045 + Math.random() * .1;
+
+  kpSTone[i] =
+    .7 +
+    .5 * plNoise(
+      kpPoint.x * 3.1,
+      kpPoint.y * 3.1 + kpPoint.z * 2.2,
+      1.7
+    );
+
+  const roll = Math.random();
+
+  kpSColor[i] =
+    roll < .46 ? 1 : (roll < .8 ? 2 : (roll < .95 ? 0 : 3));
+}
+
+
+const kpSOrder = plOrder(kpSColor, KP_SOFT, 6);
+
+
+const kpGNX = new Float32Array(KP_GRAIN);
+const kpGNY = new Float32Array(KP_GRAIN);
+const kpGNZ = new Float32Array(KP_GRAIN);
+const kpGRad = new Float32Array(KP_GRAIN);
+const kpGSize = new Float32Array(KP_GRAIN);
+const kpGAlpha = new Float32Array(KP_GRAIN);
+const kpGTone = new Float32Array(KP_GRAIN);
+const kpGPhase = new Float32Array(KP_GRAIN);
+const kpGColor = new Uint8Array(KP_GRAIN);
+const kpGBright = new Uint8Array(KP_GRAIN);
+
+
+for (let i = 0; i < KP_GRAIN; i++) {
+
+  kpSpherePoint(kpPoint);
+
+  kpGNX[i] = kpPoint.x;
+  kpGNY[i] = kpPoint.y;
+  kpGNZ[i] = kpPoint.z;
+
+  kpGRad[i] = .99 + Math.random() * .018;
+
+  kpGPhase[i] = Math.random() * PL_TAU;
+
+  kpGTone[i] =
+    .66 +
+    .62 * plNoise(
+      kpPoint.x * 5.4 + 3.1,
+      kpPoint.y * 5.4 + kpPoint.z * 4.2,
+      4.3
+    );
+
+  const brightStar = Math.random() < .006;
+
+  kpGBright[i] = brightStar ? 1 : 0;
+
+  kpGSize[i] =
+    brightStar
+      ? .9 + Math.random() * .7
+      : .5 + Math.pow(Math.random(), 2.1) * 1;
+
+  kpGAlpha[i] =
+    brightStar
+      ? .7 + Math.random() * .3
+      : .1 + Math.random() * .3;
+
+  const roll = Math.random();
+
+  kpGColor[i] =
+    brightStar
+      ? 3
+      : (roll < .4 ? 1 : (roll < .74 ? 2 : (roll < .94 ? 0 : 5)));
+}
+
+
+const kpGOrder = plOrder(kpGColor, KP_GRAIN, 6);
+
+
+const kpCNX = new Float32Array(KP_CLOUD);
+const kpCNY = new Float32Array(KP_CLOUD);
+const kpCNZ = new Float32Array(KP_CLOUD);
+const kpCRR = new Float32Array(KP_CLOUD);
+const kpCRad = new Float32Array(KP_CLOUD);
+const kpCAlpha = new Float32Array(KP_CLOUD);
+const kpCPhase = new Float32Array(KP_CLOUD);
+
+
+for (let i = 0; i < KP_CLOUD; i++) {
+
+  kpSpherePoint(kpPoint);
+
+  kpCNX[i] = kpPoint.x;
+  kpCNY[i] = kpPoint.y;
+  kpCNZ[i] = kpPoint.z;
+
+  kpCRad[i] = 1.012 + Math.random() * .014;
+
+  kpCRR[i] = .028 + Math.pow(Math.random(), 1.5) * .055;
+
+  kpCAlpha[i] = .035 + Math.random() * .075;
+
+  kpCPhase[i] = Math.random() * PL_TAU;
+}
+
+
+const kpANX = new Float32Array(KP_ATMOS);
+const kpANY = new Float32Array(KP_ATMOS);
+const kpANZ = new Float32Array(KP_ATMOS);
+const kpARad = new Float32Array(KP_ATMOS);
+const kpARR = new Float32Array(KP_ATMOS);
+const kpAAlpha = new Float32Array(KP_ATMOS);
+const kpAPhase = new Float32Array(KP_ATMOS);
+const kpADrift = new Float32Array(KP_ATMOS);
+const kpAColor = new Uint8Array(KP_ATMOS);
+
+
+for (let i = 0; i < KP_ATMOS; i++) {
+
+  kpSpherePoint(kpPoint);
+
+  kpANX[i] = kpPoint.x;
+  kpANY[i] = kpPoint.y;
+  kpANZ[i] = kpPoint.z;
+
+  kpARad[i] = 1.02 + Math.pow(Math.random(), 1.5) * .11;
+
+  kpARR[i] = .02 + Math.pow(Math.random(), 1.7) * .05;
+
+  kpAAlpha[i] = .05 + Math.random() * .16;
+
+  kpAPhase[i] = Math.random() * PL_TAU;
+
+  kpADrift[i] = .6 + Math.random() * .9;
+
+  const roll = Math.random();
+
+  kpAColor[i] = roll < .82 ? 4 : (roll < .96 ? 3 : 5);
+}
+
+
+const kpAOrder = plOrder(kpAColor, KP_ATMOS, 6);
+
+
+const kpSunX = new Float32Array(KP_SUN);
+const kpSunY = new Float32Array(KP_SUN);
+const kpSunSize = new Float32Array(KP_SUN);
+const kpSunAlpha = new Float32Array(KP_SUN);
+const kpSunPhase = new Float32Array(KP_SUN);
+
+
+for (let i = 0; i < KP_SUN; i++) {
+
+  const a = Math.random() * PL_TAU;
+
+  const r = Math.pow(Math.random(), 1.8);
+
+  kpSunX[i] = Math.cos(a) * r;
+
+  kpSunY[i] = Math.sin(a) * r;
+
+  kpSunSize[i] = .3 + Math.pow(Math.random(), 2.4) * .8;
+
+  kpSunAlpha[i] = .2 + Math.random() * .7;
+
+  kpSunPhase[i] = Math.random() * PL_TAU;
+}
+
+
+const kpStars = plStarfield(plCount(100, 58));
+
+
+function drawKepler(ctx, w, h, time) {
+
+  plBegin(ctx, w, h);
+
+  const minSide = Math.min(w, h);
+
+  const px = w * .57;
+
+  const py = h * .56;
+
+  const R = minSide * .2;
+
+  const sunX = w * .185;
+
+  const sunY = h * .175;
+
+  const sunR = minSide * .021;
+
+
+  let lx = sunX - px;
+  let ly = sunY - py;
+  let lz = R * 1.2;
+
+  const lm =
+    Math.sqrt(lx * lx + ly * ly + lz * lz) || 1;
+
+  lx /= lm;
+  ly /= lm;
+  lz /= lm;
+
+
+  const spin = time * .0000225;
+
+  const cosS = Math.cos(spin);
+  const sinS = Math.sin(spin);
+
+  const tilt = .27;
+
+  const cosT = Math.cos(tilt);
+  const sinT = Math.sin(tilt);
+
+
+  kpStars.draw(ctx, w, h, time, KP_STAR_RGB, null);
+
+
+  const sunPulse = .9 + Math.sin(time * .001) * .1;
+
+  const sunGlow = sunR * 5.2 * sunPulse;
+
+  ctx.globalAlpha = .28;
+
+  ctx.drawImage(
+    PL_GLOW,
+    sunX - sunGlow, sunY - sunGlow,
+    sunGlow * 2, sunGlow * 2
+  );
+
+  ctx.fillStyle = "rgb(" + KP_RGB[5] + ")";
+
+  for (let i = 0; i < KP_SUN; i++) {
+
+    const x = sunX + kpSunX[i] * sunR * 2.3;
+
+    const y = sunY + kpSunY[i] * sunR * 2.3;
+
+    ctx.globalAlpha =
+      kpSunAlpha[i] *
+      (.82 + Math.sin(time * .0015 + kpSunPhase[i]) * .18);
+
+    const s = kpSunSize[i];
+
+    ctx.fillRect(x - s / 2, y - s / 2, s, s);
+  }
+
+  ctx.globalAlpha = .8;
+
+  ctx.fillStyle = "rgb(255,246,232)";
+
+  const coreS = sunR * .5;
+
+  ctx.fillRect(
+    sunX - coreS / 2,
+    sunY - coreS / 2,
+    coreS,
+    coreS
+  );
+
+
+  for (let o = 0; o < KP_ATMOS; o++) {
+
+    const i = kpAOrder[o];
+
+    const x1 = kpANX[i] * cosS + kpANZ[i] * sinS;
+    const z1 = -kpANX[i] * sinS + kpANZ[i] * cosS;
+
+    const y2 = kpANY[i] * cosT - z1 * sinT;
+    const z2 = kpANY[i] * sinT + z1 * cosT;
+
+    const drift =
+      Math.sin(time * .00011 * kpADrift[i] + kpAPhase[i]) * .014;
+
+    const rr = (kpARad[i] + drift) * R;
+
+    const sx = px + x1 * rr;
+    const sy = py + y2 * rr;
+
+    const diff = x1 * lx + y2 * ly + z2 * lz;
+
+    const lit = plSmooth(-.34, .52, diff);
+
+    const rim = 1 - Math.abs(z2);
+
+    const behind = z2 < 0 ? .38 : 1;
+
+    const alpha =
+      kpAAlpha[i] *
+      (.08 + lit * 1.05) *
+      (.3 + rim * 1.2) *
+      behind *
+      (.86 + Math.sin(time * .0012 + kpAPhase[i]) * .14);
+
+    if (alpha <= .003)
+      continue;
+
+    const radius = kpARR[i] * R;
+
+    ctx.globalAlpha = alpha;
+
+    ctx.drawImage(
+      plSoft(KP_RGB[kpAColor[i]]),
+      sx - radius, sy - radius,
+      radius * 2, radius * 2
+    );
+  }
+
+
+  for (let o = 0; o < KP_SOFT; o++) {
+
+    const i = kpSOrder[o];
+
+    const x1 = kpSNX[i] * cosS + kpSNZ[i] * sinS;
+    const z1 = -kpSNX[i] * sinS + kpSNZ[i] * cosS;
+
+    const y2 = kpSNY[i] * cosT - z1 * sinT;
+    const z2 = kpSNY[i] * sinT + z1 * cosT;
+
+    if (z2 < -.06)
+      continue;
+
+    const rr = kpSRad[i] * R;
+
+    const sx = px + x1 * rr;
+    const sy = py + y2 * rr;
+
+    const diff = x1 * lx + y2 * ly + z2 * lz;
+
+    const lit = plSmooth(-.16, .46, diff);
+
+    const limb = 1 - Math.abs(z2);
+
+    const alpha =
+      kpSAlpha[i] *
+      (.05 + lit * 1.25) *
+      kpSTone[i] *
+      (1 + limb * limb * lit * .5);
+
+    if (alpha <= .003)
+      continue;
+
+    const radius = kpSRR[i] * R;
+
+    ctx.globalAlpha = alpha;
+
+    ctx.drawImage(
+      plSoft(KP_RGB[kpSColor[i]]),
+      sx - radius, sy - radius,
+      radius * 2, radius * 2
+    );
+  }
+
+
+  const cloudSpin = spin * 1.07;
+
+  const cosC = Math.cos(cloudSpin);
+  const sinC = Math.sin(cloudSpin);
+
+  for (let i = 0; i < KP_CLOUD; i++) {
+
+    const x1 = kpCNX[i] * cosC + kpCNZ[i] * sinC;
+    const z1 = -kpCNX[i] * sinC + kpCNZ[i] * cosC;
+
+    const y2 = kpCNY[i] * cosT - z1 * sinT;
+    const z2 = kpCNY[i] * sinT + z1 * cosT;
+
+    if (z2 < -.04)
+      continue;
+
+    const rr = kpCRad[i] * R;
+
+    const sx = px + x1 * rr;
+    const sy = py + y2 * rr;
+
+    const diff = x1 * lx + y2 * ly + z2 * lz;
+
+    const lit = plSmooth(-.1, .5, diff);
+
+    const alpha =
+      kpCAlpha[i] *
+      (.04 + lit * 1.3) *
+      (.9 + Math.sin(time * .0009 + kpCPhase[i]) * .1);
+
+    if (alpha <= .003)
+      continue;
+
+    const radius = kpCRR[i] * R;
+
+    ctx.globalAlpha = alpha;
+
+    ctx.drawImage(
+      plSoft(KP_RGB[3]),
+      sx - radius, sy - radius,
+      radius * 2, radius * 2
+    );
+  }
+
+
+  let fill = -1;
+
+  for (let o = 0; o < KP_GRAIN; o++) {
+
+    const i = kpGOrder[o];
+
+    const x1 = kpGNX[i] * cosS + kpGNZ[i] * sinS;
+    const z1 = -kpGNX[i] * sinS + kpGNZ[i] * cosS;
+
+    const y2 = kpGNY[i] * cosT - z1 * sinT;
+    const z2 = kpGNY[i] * sinT + z1 * cosT;
+
+    if (z2 < -.02)
+      continue;
+
+    const rr = kpGRad[i] * R;
+
+    const sx = px + x1 * rr;
+    const sy = py + y2 * rr;
+
+    const diff = x1 * lx + y2 * ly + z2 * lz;
+
+    const lit = plSmooth(-.14, .44, diff);
+
+    const limb = 1 - Math.abs(z2);
+
+    const flicker =
+      kpGBright[i]
+        ? .78 + Math.sin(time * .0017 + kpGPhase[i]) * .22
+        : .95 + Math.sin(time * .0008 + kpGPhase[i]) * .05;
+
+    let alpha =
+      kpGAlpha[i] *
+      (.05 + lit * 1.2) *
+      kpGTone[i] *
+      (1 + limb * limb * lit * .6) *
+      flicker;
+
+    if (alpha <= .004)
+      continue;
+
+    if (alpha > .97) alpha = .97;
+
+
+    if (kpGBright[i]) {
+
+      const gr =
+        kpGSize[i] * (3 + Math.sin(time * .0014 + kpGPhase[i]) * .4);
+
+      ctx.globalAlpha = alpha * .36;
+
+      ctx.drawImage(PL_GLOW, sx - gr, sy - gr, gr * 2, gr * 2);
+    }
+
+
+    const colorIndex = kpGColor[i];
+
+    if (colorIndex !== fill) {
+
+      fill = colorIndex;
+
+      ctx.fillStyle = "rgb(" + KP_RGB[colorIndex] + ")";
+    }
+
+    ctx.globalAlpha = alpha;
+
+    const s = kpGSize[i] * (1 + limb * .18);
+
+    ctx.fillRect(sx - s / 2, sy - s / 2, s, s);
+  }
+
+
+  plEnd(ctx);
+}
+
+
+/* =========================================================
+   PLATE RENDERER
+========================================================= */
+
+let catalogueInView = true;
+
+const PLATE_RENDERERS = [
+  drawSagittarius,
+  drawQuasar,
+  drawPillars,
+  drawOumuamua,
+  drawKepler
+];
+
+
+function drawSpaceObject(item,time){
+
+  const {
+    canvas,
+    index
+  }=item;
+
+  const rect =
+    canvas.getBoundingClientRect();
+
+  if(
+    rect.right < -120 ||
+    rect.left > window.innerWidth + 120 ||
+    rect.bottom < -120 ||
+    rect.top > window.innerHeight + 120
+  )
+    return;
+
+  const {
+    ctx,
+    w,
+    h
+  }=
+    resizeSpaceCanvas(canvas);
+
+  if(!w || !h)
+    return;
+
+  const renderer =
+    PLATE_RENDERERS[index];
+
+  if(renderer)
+    renderer(ctx,w,h,time);
+}
+
+
+/* =========================================================
+   ASTRA — PARTICLE GALAXY
+========================================================= */
+
+const galaxyCanvas =
+  document.getElementById("galaxyCanvas");
+
+const galaxyCtx =
+  galaxyCanvas.getContext("2d", { alpha: true });
+
+let galaxyW = 0;
+let galaxyH = 0;
+let galaxyDpr = 1;
+
+let mouseTargetX = 0;
+let mouseTargetY = 0;
+
+let mouseX = 0;
+let mouseY = 0;
+
+let galaxyScroll = 0;
+
+let galaxyInView = true;
+
+const reducedMotion =
+  window.matchMedia(
+    "(prefers-reduced-motion: reduce)"
+  ).matches;
+
+let galaxyStaticDrawn = false;
+
+const TAU = Math.PI * 2;
+
+
+const PARTICLE_COUNT =
+  MOBILE_LAYOUT ? 4200 : 7600;
+
+const BG_COUNT =
+  MOBILE_LAYOUT ? 170 : 300;
+
+const GALAXY_DPR_CAP =
+  MOBILE_LAYOUT ? 1.6 : 1.85;
+
+
+let gaussSpare = null;
+
+function gauss() {
+
+  if (gaussSpare !== null) {
+
+    const value = gaussSpare;
+
+    gaussSpare = null;
+
+    return value;
+  }
+
+  let u = 0;
+  let v = 0;
+  let s = 0;
+
+  do {
+
+    u = Math.random() * 2 - 1;
+    v = Math.random() * 2 - 1;
+
+    s = u * u + v * v;
+
+  } while (s === 0 || s >= 1);
+
+  const mul =
+    Math.sqrt(-2 * Math.log(s) / s);
+
+  gaussSpare = v * mul;
+
+  return u * mul;
+}
+
+
+const ARM_COUNT = 4;
+
+const WIND = 3.85;
+
+const ARM_WEIGHT = [1, .58, .92, .55];
+
+const ARM_TOTAL =
+  ARM_WEIGHT.reduce((a, b) => a + b, 0);
+
+const armClumps = [];
+
+for (let a = 0; a < ARM_COUNT; a++) {
+
+  const clumps = [];
+
+  const count = 13;
+
+  for (let c = 0; c < count; c++) {
+
+    clumps.push({
+
+      t:
+        .05 +
+        Math.pow(c / count + (Math.random() - .5) * .05, .92) * .96,
+
+      w:
+        .026 + Math.random() * .055,
+
+      weight:
+        .35 + Math.random() * Math.random() * 1.5,
+
+      jitter:
+        .55 + Math.random() * .8
+
+    });
+  }
+
+  armClumps.push(clumps);
+}
+
+
+function pickArm() {
+
+  let r = Math.random() * ARM_TOTAL;
+
+  for (let a = 0; a < ARM_COUNT; a++) {
+
+    r -= ARM_WEIGHT[a];
+
+    if (r <= 0)
+      return a;
+  }
+
+  return ARM_COUNT - 1;
+}
+
+
+function pickClump(arm) {
+
+  const clumps = armClumps[arm];
+
+  let total = 0;
+
+  for (let i = 0; i < clumps.length; i++)
+    total += clumps[i].weight;
+
+  let r = Math.random() * total;
+
+  for (let i = 0; i < clumps.length; i++) {
+
+    r -= clumps[i].weight;
+
+    if (r <= 0)
+      return clumps[i];
+  }
+
+  return clumps[clumps.length - 1];
+}
+
+
+const pT = new Float32Array(PARTICLE_COUNT);
+const pA = new Float32Array(PARTICLE_COUNT);
+const pSize = new Float32Array(PARTICLE_COUNT);
+const pAlpha = new Float32Array(PARTICLE_COUNT);
+const pZ = new Float32Array(PARTICLE_COUNT);
+const pPhase = new Float32Array(PARTICLE_COUNT);
+const pOff = new Float32Array(PARTICLE_COUNT);
+const pTwist = new Float32Array(PARTICLE_COUNT);
+
+const pOrbit = new Float32Array(PARTICLE_COUNT);
+const pSwirl = new Float32Array(PARTICLE_COUNT);
+const pEpi = new Float32Array(PARTICLE_COUNT);
+
+const pFlick = new Float32Array(PARTICLE_COUNT);
+
+const pColor = new Uint8Array(PARTICLE_COUNT);
+const pKind = new Uint8Array(PARTICLE_COUNT);
+const pBright = new Uint8Array(PARTICLE_COUNT);
+
+
+for (let i = 0; i < PARTICLE_COUNT; i++) {
+
+  const roll = Math.random();
+
+  const z = Math.random();
+
+  const depthScale = .62 + z * .72;
+
+  pZ[i] = z;
+
+  pPhase[i] = Math.random() * TAU;
+
+  pOff[i] = Math.random() * 1000;
+
+  pFlick[i] = .0011 + Math.random() * .0024;
+
+  pTwist[i] = .86 + Math.random() * .3;
+
+
+  if (roll < .40) {
+
+    pKind[i] = 0;
+
+    let t;
+
+    const shape = Math.random();
+
+    if (shape < .07) {
+
+      t = Math.abs(gauss()) * .017;
+
+    } else {
+
+      t = Math.pow(Math.random(), 2.95) * .27;
+    }
+
+    t = Math.max(t, .0015);
+
+    pT[i] = t;
+
+    pA[i] = Math.random() * TAU;
+
+    pOrbit[i] =
+      2.75 -
+      Math.min(2.15, t * 7.6) +
+      Math.random() * .38;
+
+    pSwirl[i] =
+      .05 +
+      (.1 + Math.random() * .4) *
+      (1 - Math.min(1, t * 2.7));
+
+    pEpi[i] =
+      .0035 + Math.random() * .017;
+
+    const near =
+      1 - Math.min(1, t / .27);
+
+    const brightStar =
+      Math.random() < .024;
+
+    pBright[i] = brightStar ? 1 : 0;
+
+    if (brightStar) {
+
+      pSize[i] =
+        (1.05 + Math.random() * .95) * depthScale;
+
+      pAlpha[i] =
+        .7 + Math.random() * .3;
+
+    } else {
+
+      pSize[i] =
+        (.33 +
+          Math.pow(Math.random(), 2.3) * 1.0 +
+          near * .46) *
+        depthScale;
+
+      pAlpha[i] =
+        (.38 + Math.random() * .5) *
+        (.7 + z * .55) *
+        (1 + near * .4);
+    }
+
+    const cr = Math.random();
+
+    pColor[i] =
+      cr < .71 ? 0 : (cr < .95 ? 2 : 1);
+
+    continue;
+  }
+
+
+  if (roll > .945) {
+
+    pKind[i] = 2;
+
+    pT[i] =
+      Math.min(1.14, Math.pow(Math.random(), .72) * 1.1);
+
+    pA[i] = Math.random() * TAU;
+
+    pSize[i] =
+      (.3 + Math.random() * .55) * depthScale;
+
+    pAlpha[i] =
+      (.05 + Math.random() * .13) * (.6 + z * .6);
+
+    pColor[i] = Math.random() < .16 ? 1 : 0;
+
+    pBright[i] = 0;
+
+    continue;
+  }
+
+
+  pKind[i] = 1;
+
+  const arm = pickArm();
+
+  const armBase = arm * (TAU / ARM_COUNT);
+
+  let t;
+
+  if (Math.random() < .74) {
+
+    const clump = pickClump(arm);
+
+    t =
+      clump.t +
+      gauss() * clump.w;
+
+  } else {
+
+    t =
+      .03 +
+      Math.pow(Math.random(), 1.05) * .99;
+  }
+
+  t = clamp(t, .02, 1.06);
+
+  pT[i] = t;
+
+  const windAngle =
+    Math.pow(t, .92) * WIND * pTwist[i];
+
+  const angularSpread =
+    (.045 + t * .13) *
+    (1 + Math.random() * .55);
+
+  const branch =
+    Math.random() < .07
+      ? gauss() * (.22 + t * .3)
+      : 0;
+
+  pA[i] =
+    armBase +
+    windAngle +
+    gauss() * angularSpread +
+    branch;
+
+  pT[i] =
+    clamp(
+      t + gauss() * (.008 + t * .038),
+      .015,
+      1.1
+    );
+
+  const brightStar =
+    Math.random() < .0075;
+
+  pBright[i] = brightStar ? 1 : 0;
+
+  pSize[i] =
+    brightStar
+      ? 1.25 + Math.random() * 1.15
+      : (.3 + Math.pow(Math.random(), 2.9) * 1.25) *
+        depthScale;
+
+  pAlpha[i] =
+    brightStar
+      ? .7 + Math.random() * .3
+      : (.13 + Math.random() * .42) *
+        (.55 + z * .7);
+
+  const cr = Math.random();
+
+  if (brightStar) {
+
+    pColor[i] = cr < .58 ? 1 : 0;
+
+  } else {
+
+    pColor[i] =
+      cr < .78 ? 0 : (cr < .955 ? 1 : 2);
+  }
+
+}
+
+
+const drawOrder = new Int32Array(PARTICLE_COUNT);
+
+(function buildOrder() {
+
+  let cursor = 0;
+
+  for (let c = 0; c < 3; c++) {
+
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+
+      if (pColor[i] === c) {
+
+        drawOrder[cursor++] = i;
+      }
+    }
+  }
+
+})();
+
+
+const COLOR_RGB = [
+  "245,245,242",
+  "185,229,243",
+  "255,214,176"
+];
+
+
+const starGlow = PL_GLOW;
+
+
+const bgX = new Float32Array(BG_COUNT);
+const bgY = new Float32Array(BG_COUNT);
+const bgS = new Float32Array(BG_COUNT);
+const bgA = new Float32Array(BG_COUNT);
+const bgP = new Float32Array(BG_COUNT);
+const bgBlue = new Uint8Array(BG_COUNT);
+const bgGlow = new Uint8Array(BG_COUNT);
+
+for (let i = 0; i < BG_COUNT; i++) {
+
+  bgX[i] = Math.random();
+  bgY[i] = Math.random();
+
+  bgS[i] = .28 + Math.pow(Math.random(), 3) * .85;
+
+  bgA[i] = .05 + Math.pow(Math.random(), 2) * .26;
+
+  bgP[i] = Math.random() * TAU;
+
+  bgBlue[i] = Math.random() < .28 ? 1 : 0;
+
+  bgGlow[i] = Math.random() < .035 ? 1 : 0;
+}
+
+
+function resizeGalaxy() {
+
+  galaxyDpr =
+    Math.min(
+      window.devicePixelRatio || 1,
+      GALAXY_DPR_CAP
+    );
+
+  galaxyW =
+    galaxyCanvas.clientWidth;
+
+  galaxyH =
+    galaxyCanvas.clientHeight;
+
+  if (!galaxyW || !galaxyH)
+    return;
+
+  galaxyCanvas.width =
+    Math.max(1, Math.round(galaxyW * galaxyDpr));
+
+  galaxyCanvas.height =
+    Math.max(1, Math.round(galaxyH * galaxyDpr));
+
+  galaxyCtx.setTransform(
+    galaxyDpr,
+    0,
+    0,
+    galaxyDpr,
+    0,
+    0
+  );
+
+  galaxyStaticDrawn = false;
+}
+
+
+function galaxyPointer(event) {
+
+  const rect =
+    galaxyCanvas.getBoundingClientRect();
+
+  if (!rect.width || !rect.height)
+    return;
+
+  mouseTargetX =
+    (event.clientX - rect.left) / rect.width - .5;
+
+  mouseTargetY =
+    (event.clientY - rect.top) / rect.height - .5;
+}
+
+galaxyCanvas.addEventListener(
+  "pointerdown",
+  galaxyPointer
+);
+
+galaxyCanvas.addEventListener(
+  "pointermove",
+  galaxyPointer
+);
+
+galaxyCanvas.addEventListener(
+  "pointerleave",
+  () => {
+
+    mouseTargetX = 0;
+    mouseTargetY = 0;
+
+  }
+);
+
+galaxyCanvas.addEventListener(
+  "pointercancel",
+  () => {
+
+    mouseTargetX = 0;
+    mouseTargetY = 0;
+
+  }
+);
+
+
+const galaxyWrap =
+  document.querySelector(".galaxy-wrap");
+
+if (galaxyWrap && "IntersectionObserver" in window) {
+
+  const galaxyObserver =
+    new IntersectionObserver(
+      entries => {
+
+        entries.forEach(entry => {
+
+          galaxyInView =
+            entry.isIntersecting;
+
+        });
+
+      },
+      { rootMargin: "160px" }
+    );
+
+  galaxyObserver.observe(galaxyWrap);
+}
+
+
+function drawGalaxy(rawTime) {
+
+  if (!galaxyW || !galaxyH)
+    return;
+
+  const time = reducedMotion ? 6200 : rawTime;
+
+  galaxyCtx.clearRect(
+    0, 0, galaxyW, galaxyH
+  );
+
+  galaxyCtx.globalCompositeOperation = "lighter";
+
+
+  const cx = galaxyW / 2;
+  const cy = galaxyH / 2;
+
+
+  for (let i = 0; i < BG_COUNT; i++) {
+
+    const x = bgX[i] * galaxyW;
+    const y = bgY[i] * galaxyH;
+
+    const twinkle =
+      .62 + Math.sin(time * .0009 + bgP[i]) * .38;
+
+    const alpha = bgA[i] * twinkle;
+
+    if (bgGlow[i]) {
+
+      const r = 7 + bgS[i] * 6;
+
+      galaxyCtx.globalAlpha = alpha * .5;
+
+      galaxyCtx.drawImage(
+        starGlow,
+        x - r, y - r,
+        r * 2, r * 2
+      );
+    }
+
+    galaxyCtx.globalAlpha = alpha;
+
+    galaxyCtx.fillStyle =
+      bgBlue[i]
+        ? "rgb(185,229,243)"
+        : "rgb(245,245,242)";
+
+    const s = bgS[i];
+
+    galaxyCtx.fillRect(
+      x - s / 2,
+      y - s / 2,
+      s,
+      s
+    );
+  }
+
+
+  const radius =
+    Math.min(galaxyW, galaxyH) *
+    (.47 - galaxyScroll * .035);
+
+  const spinGalaxy = time * .000021;
+
+  const tilt =
+    -.42 + galaxyScroll * .3;
+
+  const cosTilt = Math.cos(tilt);
+  const sinTilt = Math.sin(tilt);
+
+  const squash =
+    .57 + galaxyScroll * .1;
+
+  mouseX += (mouseTargetX - mouseX) * .055;
+  mouseY += (mouseTargetY - mouseY) * .055;
+
+  const pushX = mouseX * radius * .28;
+  const pushY = mouseY * radius * .17;
+
+  const pointerX = mouseX * galaxyW;
+  const pointerY = mouseY * galaxyH;
+
+  const influence = radius * .3;
+  const influenceSq = influence * influence;
+
+
+  let activeFill = -1;
+
+  for (let o = 0; o < PARTICLE_COUNT; o++) {
+
+    const i = drawOrder[o];
+
+    const t = pT[i];
+    const kind = pKind[i];
+    const z = pZ[i];
+
+
+    const breathe =
+      Math.sin(time * .00055 + pPhase[i]) *
+      radius * .006 * (1 + t);
+
+
+    let angle;
+    let r;
+
+
+    if (kind === 0) {
+
+      angle =
+        pA[i] +
+        spinGalaxy * pOrbit[i] +
+        Math.sin(time * .00043 + pOff[i]) * pSwirl[i] +
+        galaxyScroll * 1.15;
+
+      r =
+        t * radius +
+        Math.sin(
+          time * pFlick[i] * .62 + pPhase[i]
+        ) * pEpi[i] * radius +
+        breathe;
+
+    } else {
+
+      angle =
+        pA[i] +
+        spinGalaxy * (1.35 - t * .45) +
+        galaxyScroll * 1.15;
+
+      r = t * radius + breathe;
+    }
+
+
+    const flat =
+      kind === 0 ? .82 : squash;
+
+    let lx = Math.cos(angle) * r;
+    let ly = Math.sin(angle) * r * flat;
+
+    ly += (z - .5) * radius * (kind === 0 ? .055 : .03);
+
+
+    let x = lx * cosTilt - ly * sinTilt;
+    let y = lx * sinTilt + ly * cosTilt;
+
+
+    const turb = radius * .014 * (.35 + t);
+
+    x += Math.sin(time * .00037 + pOff[i]) * turb;
+    y += Math.cos(time * .00031 + pOff[i] * 1.7) * turb * .7;
+
+
+    const parallax = .25 + z * .85;
+
+    x += pushX * parallax * t;
+    y += pushY * parallax * t;
+
+
+    const dx = x - pointerX;
+    const dy = y - pointerY;
+
+    const distSq = dx * dx + dy * dy;
+
+    if (distSq < influenceSq && distSq > .01) {
+
+      const dist = Math.sqrt(distSq);
+
+      const falloff = 1 - dist / influence;
+
+      const force =
+        falloff * falloff * radius * .085;
+
+      x += (dx / dist) * force;
+      y += (dy / dist) * force;
+    }
+
+
+    const edgeFade =
+      1 -
+      clamp((t - .84) / .26, 0, 1) * .92;
+
+    const coreBoost =
+      kind === 0
+        ? 1 + (1 - clamp(t / .26, 0, 1)) * 1.3
+        : 1 + (1 - clamp(t / .34, 0, 1)) * .35;
+
+    const twinkle =
+      pBright[i]
+        ? .7 +
+          Math.sin(
+            time * (pFlick[i] + .0013) + pPhase[i]
+          ) * .3
+        : .84 + Math.sin(time * .0014 + pPhase[i]) * .16;
+
+    let alpha =
+      pAlpha[i] *
+      edgeFade *
+      coreBoost *
+      twinkle;
+
+    if (alpha <= .004)
+      continue;
+
+    if (alpha > .95) alpha = .95;
+
+
+    if (pBright[i]) {
+
+      const gr =
+        pSize[i] *
+        (4 + Math.sin(time * .0018 + pPhase[i]) * .55);
+
+      galaxyCtx.globalAlpha = alpha * .5;
+
+      galaxyCtx.drawImage(
+        starGlow,
+        cx + x - gr,
+        cy + y - gr,
+        gr * 2,
+        gr * 2
+      );
+    }
+
+
+    const colorIndex = pColor[i];
+
+    if (colorIndex !== activeFill) {
+
+      activeFill = colorIndex;
+
+      galaxyCtx.fillStyle =
+        "rgb(" + COLOR_RGB[colorIndex] + ")";
+    }
+
+    galaxyCtx.globalAlpha = alpha;
+
+    const s = pSize[i];
+
+    galaxyCtx.fillRect(
+      cx + x - s / 2,
+      cy + y - s / 2,
+      s,
+      s
+    );
+  }
+
+
+  galaxyCtx.globalAlpha = 1;
+
+  galaxyCtx.globalCompositeOperation = "source-over";
+}
+
+
+function animateGalaxy(time) {
+
+  if (galaxyInView) {
+
+    if (reducedMotion) {
+
+      if (!galaxyStaticDrawn) {
+
+        drawGalaxy(time);
+
+        galaxyStaticDrawn = true;
+      }
+
+    } else {
+
+      drawGalaxy(time);
+    }
+  }
+
+  requestAnimationFrame(
+    animateGalaxy
+  );
+
+}
+
+requestAnimationFrame(
+  animateGalaxy
+);
+
+
+/* =========================================================
+   CLOSING CONTOURS
+========================================================= */
+
+const closeCanvas=
+  document.getElementById(
+    "closeCanvas"
+  );
+
+const closeCtx=
+  closeCanvas.getContext("2d");
+
+let closeW=0;
+let closeH=0;
+let closeDpr=1;
+
+
+function resizeClose(){
+
+  closeDpr=
+    Math.min(
+      window.devicePixelRatio||1,
+      2
+    );
+
+  closeW=
+    closeCanvas.clientWidth;
+
+  closeH=
+    closeCanvas.clientHeight;
+
+  closeCanvas.width=
+    Math.max(1,Math.round(closeW*closeDpr));
+
+  closeCanvas.height=
+    Math.max(1,Math.round(closeH*closeDpr));
+
+  closeCtx.setTransform(
+    closeDpr,
+    0,
+    0,
+    closeDpr,
+    0,
+    0
+  );
+}
+
+
+function drawClose(time,progress){
+
+  if(!closeW || !closeH)
+    return;
+
+  closeCtx.clearRect(
+    0,0,
+    closeW,
+    closeH
+  );
+
+  closeCtx.fillStyle=
+    "#F5F5F2";
+
+  closeCtx.fillRect(
+    0,0,
+    closeW,
+    closeH
+  );
+
+
+  const offset=
+    lerp(
+      -closeH*.03,
+      closeH*.03,
+      progress
+    );
+
+  const scale=
+    lerp(
+      1.06,
+      1.03,
+      progress
+    );
+
+
+  closeCtx.save();
+
+  closeCtx.translate(
+    closeW/2,
+    closeH/2+offset
+  );
+
+  closeCtx.scale(
+    scale,
+    scale
+  );
+
+  closeCtx.translate(
+    -closeW/2,
+    -closeH/2
+  );
+
+
+  for(
+    let i=0;
+    i<26;
+    i++
+  ){
+
+    const y=
+      closeH*(i+1)/27;
+
+    closeCtx.beginPath();
+
+    for(
+      let x=-50;
+      x<=closeW+50;
+      x+=9
+    ){
+
+      const wave=
+        Math.sin(
+          x*.007+
+          i*.4+
+          time*.00012
+        )*12;
+
+      const yy=
+        y+wave;
+
+      if(x===-50)
+        closeCtx.moveTo(x,yy);
+      else
+        closeCtx.lineTo(x,yy);
+    }
+
+
+    closeCtx.strokeStyle=
+      (i+1)%6===0
+      ? "rgba(184,192,188,.6)"
+      : "rgba(9,11,12,.07)";
+
+    closeCtx.lineWidth=1;
+
+    closeCtx.stroke();
+
+  }
+
+  closeCtx.restore();
+
+}
+
+
+/* =========================================================
+   RESIZE
+========================================================= */
+
+function resizeAll(){
+
+  resizeHero();
+  resizeGalaxy();
+  resizeClose();
+
+}
+
+window.addEventListener(
+  "resize",
+  resizeAll
+);
+
+
+/* =========================================================
+   CATALOGUE MEASUREMENT
+========================================================= */
+
+const catalogueStage=
+  document.querySelector(
+    ".stage-catalogue"
+  );
+
+const catalogueTrack=
+  document.getElementById(
+    "catalogueTrack"
+  );
+
+let catalogueTravel=0;
+
+
+function calculateCatalogueTravel(){
+
+  /* mobile = native rail, section height comes from content */
+
+  if(MOBILE_LAYOUT){
+
+    catalogueTravel=0;
+
+    return;
+  }
+
+  catalogueTravel=
+    Math.max(
+      0,
+      catalogueTrack.scrollWidth-
+      window.innerWidth
+    );
+
+}
+
+calculateCatalogueTravel();
+
+window.addEventListener(
+  "resize",
+  calculateCatalogueTravel
+);
+
+
+if(catalogueStage && "IntersectionObserver" in window){
+
+  const catalogueObserver=
+    new IntersectionObserver(
+      entries=>{
+
+        entries.forEach(entry=>{
+
+          catalogueInView=
+            entry.isIntersecting;
+
+        });
+
+      },
+      {rootMargin:"200px"}
+    );
+
+  catalogueObserver.observe(
+    catalogueStage
+  );
+}
+
+
+/* =========================================================
+   SCROLL ENGINE
+========================================================= */
+
+const heroStage=
+  document.querySelector(
+    ".stage-hero"
+  );
+
+const processStage=
+  document.querySelector(
+    ".stage-process"
+  );
+
+const closeStage=
+  document.querySelector(
+    ".stage-close"
+  );
+
+let ticking=false;
+
+
+function updateScroll(){
+
+  ticking=false;
+
+
+  /* on mobile nothing is pinned, so every
+     choreography value stays at its neutral state */
+
+  const heroP=
+    stageProgress(
+      heroStage
+    );
+
+  const catalogueP=
+    stageProgress(
+      catalogueStage
+    );
+
+  const closeP=
+    stageProgress(
+      closeStage
+    );
+
+
+  const heroEase=
+    ease(heroP);
+
+  root.style.setProperty(
+    "--hero-y",
+    `${lerp(0,-70,heroEase)}px`
+  );
+
+  root.style.setProperty(
+    "--hero-scale",
+    lerp(1,.82,heroEase)
+  );
+
+  root.style.setProperty(
+    "--hero-alpha",
+    lerp(1,0,heroEase)
+  );
+
+  root.style.setProperty(
+    "--hero-vignette",
+    lerp(.02,.72,heroEase)
+  );
+
+
+  root.style.setProperty(
+    "--catalogue-x",
+    `${-catalogueP*catalogueTravel}px`
+  );
+
+
+  galaxyScroll=
+    MOBILE_LAYOUT
+      ? 0
+      : stageProgress(
+          processStage
+        );
+
+  if(reducedMotion)
+    galaxyStaticDrawn=false;
+
+
+  root.style.setProperty(
+    "--close-y",
+    `${lerp(-3,3,closeP)}%`
+  );
+
+  root.style.setProperty(
+    "--close-scale",
+    lerp(1.06,1.03,closeP)
+  );
+
+}
+
+
+function onScroll(){
+
+  if(ticking)
+    return;
+
+  ticking=true;
+
+  requestAnimationFrame(
+    updateScroll
+  );
+
+}
+
+window.addEventListener(
+  "scroll",
+  onScroll,
+  {
+    passive:true
+  }
+);
+
+
+/* =========================================================
+   LAYOUT MODE CHANGES
+   Keeps html.is-mobile, canvas sizes and the scroll
+   choreography in sync across resize / orientation change.
+========================================================= */
+
+function applyLayoutMode(){
+
+  setLayoutMode();
+
+  calculateCatalogueTravel();
+
+  resizeAll();
+
+  updateScroll();
+}
+
+
+if(mobileQuery.addEventListener){
+
+  mobileQuery.addEventListener(
+    "change",
+    applyLayoutMode
+  );
+
+}else if(mobileQuery.addListener){
+
+  mobileQuery.addListener(
+    applyLayoutMode
+  );
+}
+
+
+window.addEventListener(
+  "orientationchange",
+  ()=>{
+
+    setTimeout(
+      applyLayoutMode,
+      180
+    );
+  }
+);
+
+if(window.visualViewport){
+
+  let viewportTimer=null;
+
+  window.visualViewport.addEventListener(
+    "resize",
+    ()=>{
+
+      clearTimeout(viewportTimer);
+
+      viewportTimer=
+        setTimeout(
+          applyLayoutMode,
+          140
+        );
+    }
+  );
+}
+
+
+resizeAll();
+
+updateScroll();
+
+
+/* =========================================================
+   RENDER LOOP
+========================================================= */
+
+function render(time){
+
+  drawHero(time);
+
+  if(catalogueInView){
+
+    spaceObjects.forEach(
+      item=>
+        drawSpaceObject(
+          item,
+          time
+        )
+    );
+  }
+
+
+  drawClose(
+    time,
+    MOBILE_LAYOUT
+      ? 0
+      : stageProgress(closeStage)
+  );
+
+
+  requestAnimationFrame(
+    render
+  );
+
+}
+
+requestAnimationFrame(render);
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+function navOffset(){
+
+  return window.innerWidth > 900 ? 76 : 60;
+}
+
+
+document
+  .querySelectorAll(".nav-links a")
+  .forEach(link=>{
+
+    link.addEventListener(
+      "click",
+      event=>{
+
+        const id=
+          link.getAttribute("href");
+
+        if(!id.startsWith("#"))
+          return;
+
+        const target=
+          document.querySelector(id);
+
+        if(!target)
+          return;
+
+        event.preventDefault();
+
+        window.scrollTo({
+
+          top:
+            Math.max(
+              0,
+              target.offsetTop-
+              navOffset()
+            ),
+
+          behavior:
+            "smooth"
+
+        });
+
+      }
+    );
+
+  });
+
+
+/* =========================================================
+   HERO BUTTON
+========================================================= */
+
+document
+  .querySelector(".hero-button")
+  .addEventListener(
+    "click",
+    ()=>{
+
+      document
+        .querySelector("#objects")
+        .scrollIntoView({
+          behavior:"smooth"
+        });
+
+    }
+  );
+
+</script>
+
+</body>
+</html>
